@@ -1,9 +1,9 @@
-# wsy19/zxcvbn
+# PaperY0/zxcvbn
 
 > Dropbox [zxcvbn](https://github.com/dropbox/zxcvbn) 密码强度估计器的 MoonBit 移植。
 > 输入密码字符串，输出 **0–4 强度分 + 熵值（guesses/log10）+ 四场景破解时间 + 命中的模式明细 + 改进建议**。
 
-[English below](#wsy19zxcvbn-en)
+[English below](#papery0zxcvbn-en)
 
 ## 为什么是它
 
@@ -12,9 +12,8 @@ MoonBit 生态里没有一个**攻击模型驱动**的密码强度估计器：�
 `kesmeey/tools`）经逐个读源码确认，全部是 **LUDS 字符计数式规则打分**（长度档位 + 字符类别
 存在性 + 重复扣分）——没有熵、没有词典、没有 l33t、没有键盘邻接、没有日期/序列/重复模式、
 没有破解时间。zxcvbn 模拟真实破解器：对密码做全模式匹配后取**最小猜测数**，输出保守的强度
-估计。三轮查重（mooncakes 2622 模块 + GitHub + awesome-moonbit + 官方 `moon search`）确认
-这里是空白，证据见 [`../research/ecosystem-gap-zxcvbn-verified.md`](../research/ecosystem-gap-zxcvbn-verified.md)
-（位于本仓库上级的资料目录）。
+估计。三轮查重（mooncakes 2622 模块全量扫描 + GitHub 10 组检索 + awesome-moonbit +
+官方 `moon search zxcvbn` → No modules found）确认这里是空白。
 
 ## 能力范围
 
@@ -86,9 +85,9 @@ python3 tools/gen_dictionaries.py   # 从 data/upstream 重新生成词典数据
 
 ---
 
-<a id="wsy19zxcvbn-en"></a>
+<a id="papery0zxcvbn-en"></a>
 
-## wsy19/zxcvbn (EN)
+## PaperY0/zxcvbn (EN)
 
 A MoonBit port of Dropbox's [zxcvbn](https://github.com/dropbox/zxcvbn) password strength
 estimator: pattern-matching based (dictionaries, l33t, keyboard adjacency, dates, sequences,

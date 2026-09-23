@@ -1,4 +1,4 @@
-// wsy19/zxcvbn —— Dropbox zxcvbn 的 MoonBit 移植（MIT，(c) Dropbox, Inc.）
+// PaperY0/zxcvbn —— Dropbox zxcvbn 的 MoonBit 移植（MIT，(c) Dropbox, Inc.）
 //
 // 本文件是公共 API 的设计契约（Phase 2 收口时实现）。
 // 完整选题说明与实现步骤：docs/implementation-plan.md

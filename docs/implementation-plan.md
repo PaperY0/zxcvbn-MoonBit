@@ -1,9 +1,9 @@
 # zxcvbn-MoonBit 选题详细内容与实现计划
 
-> 项目：`wsy19/zxcvbn`（仓库目录 `zxcvbn-moonbit/`）
+> 项目：`PaperY0/zxcvbn`（仓库目录 `zxcvbn-moonbit/`）
 > 选题：将 Dropbox 开源 **zxcvbn** 密码强度估计器移植到 MoonBit
 > 状态：**选题已固定**；旧候选选题（Bloom Filter / Cron / Humanize 等）已全部删除
-> 查重：三轮复查（详见 `research/ecosystem-gap-zxcvbn-verified.md`、`dupcheck-result*.txt`）——**MoonBit 生态无同类库，0 重复**
+> 查重：三轮复查（mooncakes 2622 模块 + GitHub + awesome + core/x + 官方 moon search）——**MoonBit 生态无同类库，0 重复**
 > 实验前数据：**已全部配好并验证**（工具链 / 上游数据 / 项目骨架 / 词典嵌入编译运行测试 5/5 通过）
 > 整理日期：2026-09-23（Asia/Shanghai）
 
@@ -59,7 +59,7 @@
 ## 五、架构设计
 
 ```
-wsy19/zxcvbn（单包，多文件；moon.mod name = wsy19/zxcvbn）
+PaperY0/zxcvbn（单包，多文件；moon.mod name = PaperY0/zxcvbn）
 ├── zxcvbn.mbt            # 公共 API：pub fn zxcvbn(password, user_inputs) -> Entropy
 ├── matching.mbt          # omnimatch：8 个匹配器 + 工具（translate/mod/sorted）
 ├── scoring.mbt           # most_guessable_match_sequence DP + 各模式 guesses + nCk/log
@@ -93,7 +93,7 @@ zxcvbn(pw, user_inputs)
 | --- | --- | --- | --- |
 | 1 | **多行字符串 = 每行 `#|` 前缀**（`#|` 原始内容零转义，`$|` 支持转义/插值） | 官方文档 language/fundamentals + 本目录 `/tmp/mbt-test` 实测通过 | 词典嵌入无需转义，反斜杠/引号/保留字安全 |
 | 2 | **core 的 Regex 不支持 `\d \w \s`**，须用 POSIX 类 `[[:digit:]]`（ASCII 语义） | 官方文档 fundamentals 第 "String#" 正则小节 | 上游 `\d` 正则全部改写；`^`/`$` 是非多行锚点（够用） |
-| 3 | **`String` 是 UTF-16 code unit 序列**；`String::length()` 与 `s[i]` 都是码元粒度 | core/builtin/string_methods.mbt 注释原文 + research 报告 3.1 节 | **必须按字符遍历**（`for c in password` / `password.to_array()`），否则复刻 moonvault 的 emoji 长度 bug（BMP 外字符算 2 长度、代理码元被判"特殊字符"） |
+| 3 | **`String` 是 UTF-16 code unit 序列**；`String::length()` 与 `s[i]` 都是码元粒度 | MoonBit core 源码注释原文（生态内 moonvault 的 emoji 长度 bug 是反例） | **必须按字符遍历**（`for c in password` / `password.to_array()`），否则复刻 moonvault 的 emoji 长度 bug（BMP 外字符算 2 长度、代理码元被判"特殊字符"） |
 | 4 | `Lazy::Lazy(thunk)` + `.force()`（`moonbitlang/core/lazy`） | 本机 core 源码 | 词典 rank 表惰性构建，首次 `zxcvbn()` 调用时生效 |
 | 5 | Array/Map 的 `push`/`[]=` 等方法调用**不需要** `let mut`；`mut` 只在重绑定变量时需要 | `moon check` 实测（unused_mut 报错） | 照 JS 写法直接 `let m = Map([])` 后 `m[k]=v` |
 | 6 | 大字符串字面量按块切分（本项目每 4000 词一个 const，共 73 块） | 2.7MB 数据 `moon check`/`moon test` 5/5 通过 | 词典数据按 chunk 嵌入，避免单节点过大 |
@@ -116,7 +116,7 @@ zxcvbn(pw, user_inputs)
 | Rank 语义/查找测试 | ✅ `moon test` **5/5 通过**（词表规模、顺序、rank、词典识别、Regex POSIX 类） | 实测 |
 | 项目骨架 + 公共 API 契约 + CLI 壳 | ✅ `moon check` 0 错误（36 条 WIP 弃用警告，Phase 1–3 清零） | 实测 |
 | Git 提交 | ✅ **10 个有效 commits**（申报硬要求 ≥10 已达成） | `git log` |
-| README / 计划 / 数据清单 / 申报书草稿 | ✅ 已写（`README.mbt.md`、`docs/implementation-plan.md`、`data/README.md`、`../research/proposal-zxcvbn-draft.md`） | 见文件 |
+| README / 计划 / 数据清单 / 申报书草稿 | ✅ 已写（`README.mbt.md`、`docs/implementation-plan.md`、`data/README.md`（申报书为本地文档，不入库）） | 见文件 |
 
 **剩余警告债务**（`moon check` 不计错误，Phase 3 工程化时清零）：unused_constructor / struct_never_constructed（API 草案类型，Phase 1 实现后消除）、deprecated `inspect`→Debug、个别 unused_package。**CI 第一阶段用 `moon check` 不接 `--deny-warn`**，D9 起切到 `--deny-warn`。
 
@@ -134,7 +134,8 @@ zxcvbn(pw, user_inputs)
 - [x] LICENSE 保留上游版权声明（MIT）
 - [x] **10 个有效 commits**（申报硬要求达成：`git log --oneline`）
 - [ ] `.github/workflows/` CI（check/test 双后端矩阵）——Phase 3（D11）补，申报后不影响
-- [ ] **push GitHub 公开仓库 + 从报名二维码提交一页申报书**（`../research/proposal-zxcvbn-draft.md` 已备好草稿，**截止 9-24 24:00，今日必做**）
+- [x] **push GitHub 公开仓库 `PaperY0/MoonBit`**（已完成隐私清理：模块名/作者身份/失效外链）
+- [ ] 从报名二维码提交一页申报书（本地草稿已备好，**截止 9-24 24:00，今日必做**）
 
 ### Phase 1：纵向打通 MVP（申报后 D1–D5）
 
@@ -198,7 +199,7 @@ zxcvbn(pw, user_inputs)
 
 **D11 CI + 发布 + 演示**
 - GitHub Actions：`moon fmt --check` / `moon check` / `moon test`（三后端矩阵）
-- README 补全：安装（`moon add wsy19/zxcvbn`）、API 文档、3 个场景示例（注册表单后端 / CLI / Wasm 浏览器强度条 demo 页）、限制说明
+- README 补全：安装（`moon add PaperY0/zxcvbn`）、API 文档、3 个场景示例（注册表单后端 / CLI / Wasm 浏览器强度条 demo 页）、限制说明
 - 发布 mooncakes.io（`moon login` → `moon publish` 或 bundle 上传），全新临时目录 `moon add` 复现安装
 - `demo/`：最小 HTML + wasm 强度条（证明"MoonBit/Wasm 天然适合浏览器场景"）
 
@@ -231,11 +232,11 @@ zxcvbn(pw, user_inputs)
 - [ ] 官方向量 22 个 test 块全部转写通过
 - [ ] `DIFF-REPORT.md`：与 zxcvbn-rs 在 ≥500 个输入上 score/guesses 一致（log10/crack_times 容差内）
 - [ ] 覆盖率报告入库；边界用例（空/emoji/1000 长度/user_inputs）全部通过
-- [ ] README 可从零复现：`moon add wsy19/zxcvbn` + 3 个场景示例 + CLI
+- [ ] README 可从零复现：`moon add PaperY0/zxcvbn` + 3 个场景示例 + CLI
 - [ ] mooncakes.io 已发布，LICENSE 含上游版权声明
 - [ ] ≥10 个有意义的 commits，CI 徽章在 README
 
-## 十二、查重结论摘要（申报话术见 research/ecosystem-gap-zxcvbn-verified.md 第九节）
+## 十二、查重结论摘要（申报话术见 README「为什么是它」）
 
 - mooncakes.io：2622 个模块全量扫描，`zxcvbn` 0 命中；官方的 `moon search zxcvbn` → **No modules found**（2026-09-23）
 - GitHub：`zxcvbn moonbit` / `password strength topic:moonbit` 等 10 组检索 0 或无关；近期 `topic:moonbit` top100 无同方向

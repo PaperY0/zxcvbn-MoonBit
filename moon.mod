@@ -1,13 +1,13 @@
 // Learn more about moon.mod configuration:
 // https://docs.moonbitlang.com/en/latest/toolchain/moon/module.html
 
-name = "wsy19/zxcvbn"
+name = "PaperY0/zxcvbn"
 
 version = "0.1.0"
 
 readme = "README.mbt.md"
 
-repository = ""
+repository = "https://github.com/PaperY0/MoonBit"
 
 license = "MIT"
 
