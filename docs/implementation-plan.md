@@ -100,6 +100,9 @@ zxcvbn(pw, user_inputs)
 | 7 | 工具链版本 `moon 0.1.20260920`，`moon new` 生成 moon.mod/moon.pkg 新版布局 | 本机已安装（`~/.moon/bin`） | 按新布局组织；CI 固定该版本 |
 | 8 | `inspect(x, content=)` 断言用 Debug 格式（字符串不带引号） | moon test 实测 | 测试断言写法注意格式 |
 | 9 | `StringView::to_string()` 已废弃，用 `to_owned()` | moon check 警告 | 从 StringView 建 owned String 用 `to_owned()` |
+| 10 | **`core/env` 提供 `args()` 与 `now()`（毫秒时间戳）** | core/env/env.mbt 源码 | `REFERENCE_YEAR` 有一个运行时选项：`env.now()` → 手算 UTC 年份；但 MVP 仍用参数默认 2026（确定性测试优先），运行时当年作为 Phase 3 可选增强 |
+| 11 | `derive(Show)` 已废弃 → `derive(Debug)`；**字符串插值 `\{x}` 需要 `Show`** | moon check 实测 | 结构体 derive(Eq, Debug)；测试断言用 `inspect`/Debug 输出，失败信息尽量别插值枚举 |
+| 12 | `moon fmt` 会自动整理（含 `#|` 数据文件，不动数据行） | moon fmt 实测 | 每日闭环第 4 步直接跑，无需为数据文件开白名单 |
 
 ## 七、实验前数据配置（✅ 已完成并验证）
 
@@ -110,7 +113,12 @@ zxcvbn(pw, user_inputs)
 | 上游 dropbox/zxcvbn + zxcvbn-rs 源码/数据 | ✅ 已下载解包 | `data/upstream/`（含 MIT LICENSE） |
 | 词典生成脚本 | ✅ `tools/gen_dictionaries.py`（读 txt → `#|` 多行字符串 + 解析函数） | 6 词典 47023/100000/4275/1219/88799/39070 词 |
 | 数据嵌入编译 | ✅ `moon check` 0 错误（2.7MB / 73 chunks） | 实测 |
-| rank 语义/查找测试 | ✅ `moon test` **5/5 通过**（词表规模、顺序、rank、词典识别、Regex POSIX 类） | 实测 |
+| Rank 语义/查找测试 | ✅ `moon test` **5/5 通过**（词表规模、顺序、rank、词典识别、Regex POSIX 类） | 实测 |
+| 项目骨架 + 公共 API 契约 + CLI 壳 | ✅ `moon check` 0 错误（36 条 WIP 弃用警告，Phase 1–3 清零） | 实测 |
+| Git 提交 | ✅ **10 个有效 commits**（申报硬要求 ≥10 已达成） | `git log` |
+| README / 计划 / 数据清单 / 申报书草稿 | ✅ 已写（`README.mbt.md`、`docs/implementation-plan.md`、`data/README.md`、`../research/proposal-zxcvbn-draft.md`） | 见文件 |
+
+**剩余警告债务**（`moon check` 不计错误，Phase 3 工程化时清零）：unused_constructor / struct_never_constructed（API 草案类型，Phase 1 实现后消除）、deprecated `inspect`→Debug、个别 unused_package。**CI 第一阶段用 `moon check` 不接 `--deny-warn`**，D9 起切到 `--deny-warn`。
 
 ## 八、实现步骤（完整路线图，按上游文件逐个移植）
 
@@ -122,9 +130,11 @@ zxcvbn(pw, user_inputs)
 - [x] 工具链安装、上游数据下载、项目骨架 `moon new`
 - [x] 词典数据嵌入 + 5 项去风险测试通过（最大不确定性已排除）
 - [x] `frequency_lists.mbt`（Dictionary 枚举 / build_ranked_dict / ranked_lookup）
-- [ ] README.mbt.md（一句话定义、API、3 个使用场景、非目标、查重结论、许可）
-- [ ] LICENSE 保留上游版权声明；`.github/workflows/` CI（check/test 双后端）
-- [ ] ≥10 个真实 commits 后 push GitHub，提交一页申报书（**截止 9-24 24:00**）
+- [x] README.mbt.md（一句话定义、API、3 个使用场景、非目标、查重结论、许可）
+- [x] LICENSE 保留上游版权声明（MIT）
+- [x] **10 个有效 commits**（申报硬要求达成：`git log --oneline`）
+- [ ] `.github/workflows/` CI（check/test 双后端矩阵）——Phase 3（D11）补，申报后不影响
+- [ ] **push GitHub 公开仓库 + 从报名二维码提交一页申报书**（`../research/proposal-zxcvbn-draft.md` 已备好草稿，**截止 9-24 24:00，今日必做**）
 
 ### Phase 1：纵向打通 MVP（申报后 D1–D5）
 
