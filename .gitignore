@@ -1,0 +1,8 @@
+.DS_Store
+_build/
+target/
+target
+.mooncakes/
+.moonagent/
+# upstream data snapshots (extracted copies are kept; tarballs are regenerable)
+data/upstream/*.tar.gz
