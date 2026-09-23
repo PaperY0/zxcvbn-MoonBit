@@ -69,6 +69,15 @@ data/upstream/dropbox-zxcvbn/src/frequency_lists.coffee
   跨表去重语义、短稀词剔除语义、Regex POSIX 类
 - 多行字符串用 MoonBit 官方 `#|` 行前缀语法（原始内容零转义）
 
+**生成后必须跑 `moon fmt`**：生成器输出的 `const X : String = #|` 会被 fmt 规范成
+`const X : String =\n  #|`（`#|` 及数据行缩进），内容等价但字节不同。标准流程：
+
+```bash
+python3 tools/gen_dictionaries.py   # 解析 coffee + 双源断言 + 写 frequency_data.mbt
+moon fmt                            # 规范化多行字符串缩进
+moon test                           # 验证（5/5）
+```
+
 ## 注意事项
 
 1. `dropbox-zxcvbn/` 与 `zxcvbn-rs/` 是**只读参考**，不要改动；`data/upstream/*.tar.gz`
