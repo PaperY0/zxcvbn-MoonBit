@@ -1,0 +1,6 @@
+import {
+  "wsy19/zxcvbn" @lib,
+  "moonbitlang/core/env",
+}
+
+pkgtype(kind: "executable")
