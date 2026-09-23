@@ -18,7 +18,7 @@
 1. **真实需求**：注册表单、改密校验、CLI 工具、Web 应用都要评估密码强度；MoonBit 的 Web 生态（moonapi/mooncat 等）正缺这一环，纯计算库 + Wasm 后端天然适合浏览器场景（前端注册表单即时打分、密码不回传）。
 2. **生态空白**：mooncakes 2622 个模块、GitHub `topic:moonbit` 全量检索 0 个 zxcvbn 实现；现存 4 个名字带"密码强度"的库（moonvault / moonpassword / strongPasswordChecker / kesmeey-tools）逐个读源码确认全部是 **LUDS 字符计数式规则打分**（长度档位+字符类别+重复扣分），没有熵、没有攻击模型、没有词典/l33t/键盘/日期/序列模式。
 3. **规格清晰可验证**：上游 MIT 许可、有官方测试向量（22 个 test 块）、有强类型同范式移植（zxcvbn-rs，MIT）可差分对拍——这是评委视角的"正确性可硬验证"。
-4. **12 天可交付**：纯算法、边界清晰、数据已就位（见第七节，2.7MB 词典编译运行已实测通过），主要工作量是逐模块移植 + 官方向量转写。
+4. **12 天可交付**：纯算法、边界清晰、数据已就位（见第七节，961.8KB 词典编译运行已实测通过；数据源为上游过滤后的 frequency_lists.coffee），主要工作量是逐模块移植 + 官方向量转写。
 
 ## 三、功能范围
 
@@ -26,7 +26,7 @@
 
 | 能力 | 上游对应 | 说明 |
 | --- | --- | --- |
-| 词典匹配 | `matching.coffee` `dictionary_match` | 6 个频率词典（47k 常见密码 / 100k 维基词 / 男女名 / 88k 姓氏 / 39k 影视词），取最小 guesses |
+| 词典匹配 | `matching.coffee` `dictionary_match` | 6 个频率词典（30000/30000/3712/983/10000/19160，共 93,855 词，取自上游 frequency_lists.coffee，与 zxcvbn-rs 逐词一致），取最小 guesses |
 | 反向词典 | `reverse_dictionary_match` | 反转串命中（drowssap） |
 | l33t 替换 | `l33t_match` + `L33T_TABLE` | a→4@、e→3、i→1!| … 17 条替换表 + 子集枚举 |
 | 键盘空间 | `spatial_match` + `adjacency_graphs` | qwerty / dvorak / keypad / mac_keypad 四图，转向/位移计数 |
@@ -96,7 +96,7 @@ zxcvbn(pw, user_inputs)
 | 3 | **`String` 是 UTF-16 code unit 序列**；`String::length()` 与 `s[i]` 都是码元粒度 | MoonBit core 源码注释原文（生态内 moonvault 的 emoji 长度 bug 是反例） | **必须按字符遍历**（`for c in password` / `password.to_array()`），否则复刻 moonvault 的 emoji 长度 bug（BMP 外字符算 2 长度、代理码元被判"特殊字符"） |
 | 4 | `Lazy::Lazy(thunk)` + `.force()`（`moonbitlang/core/lazy`） | 本机 core 源码 | 词典 rank 表惰性构建，首次 `zxcvbn()` 调用时生效 |
 | 5 | Array/Map 的 `push`/`[]=` 等方法调用**不需要** `let mut`；`mut` 只在重绑定变量时需要 | `moon check` 实测（unused_mut 报错） | 照 JS 写法直接 `let m = Map([])` 后 `m[k]=v` |
-| 6 | 大字符串字面量按块切分（本项目每 4000 词一个 const，共 73 块） | 2.7MB 数据 `moon check`/`moon test` 5/5 通过 | 词典数据按 chunk 嵌入，避免单节点过大 |
+| 6 | 大字符串字面量按块切分（本项目每 4000 词一个 const，共 26 块） | 961.8KB 数据 `moon check`/`moon test` 5/5 通过 | 词典数据按 chunk 嵌入，避免单节点过大 |
 | 7 | 工具链版本 `moon 0.1.20260920`，`moon new` 生成 moon.mod/moon.pkg 新版布局 | 本机已安装（`~/.moon/bin`） | 按新布局组织；CI 固定该版本 |
 | 8 | `inspect(x, content=)` 断言用 Debug 格式（字符串不带引号） | moon test 实测 | 测试断言写法注意格式 |
 | 9 | `StringView::to_string()` 已废弃，用 `to_owned()` | moon check 警告 | 从 StringView 建 owned String 用 `to_owned()` |
@@ -112,13 +112,13 @@ zxcvbn(pw, user_inputs)
 | `moon update` + `moon search zxcvbn` | ✅ 官方注册表 0 模块 | `dupcheck-result6.txt` 末节 |
 | 上游 dropbox/zxcvbn + zxcvbn-rs 源码/数据 | ✅ 已下载解包 | `data/upstream/`（含 MIT LICENSE） |
 | 词典生成脚本 | ✅ `tools/gen_dictionaries.py`（读 txt → `#|` 多行字符串 + 解析函数） | 6 词典 47023/100000/4275/1219/88799/39070 词 |
-| 数据嵌入编译 | ✅ `moon check` 0 错误（2.7MB / 73 chunks） | 实测 |
+| 数据嵌入编译 | ✅ `moon check` 0 错误（961.8KB / 26 chunks） | 实测 |
 | Rank 语义/查找测试 | ✅ `moon test` **5/5 通过**（词表规模、顺序、rank、词典识别、Regex POSIX 类） | 实测 |
-| 项目骨架 + 公共 API 契约 + CLI 壳 | ✅ `moon check` 0 错误（36 条 WIP 弃用警告，Phase 1–3 清零） | 实测 |
+| 项目骨架 + 公共 API 契约 + CLI 词典探测 | ✅ `moon check` 0 错误（25 条 WIP 警告，Phase 1–3 清零） | 实测 |
 | Git 提交 | ✅ **10 个有效 commits**（申报硬要求 ≥10 已达成） | `git log` |
 | README / 计划 / 数据清单 / 申报书草稿 | ✅ 已写（`README.mbt.md`、`docs/implementation-plan.md`、`data/README.md`（申报书为本地文档，不入库）） | 见文件 |
 
-**剩余警告债务**（`moon check` 不计错误，Phase 3 工程化时清零）：unused_constructor / struct_never_constructed（API 草案类型，Phase 1 实现后消除）、deprecated `inspect`→Debug、个别 unused_package。**CI 第一阶段用 `moon check` 不接 `--deny-warn`**，D9 起切到 `--deny-warn`。
+**剩余警告债务**（`moon check` 不计错误，Phase 3 工程化时清零）：implicit_impl_as_method ×12（derive 晋升，Phase 1 实现后随类型落位消除）、unused_constructor ×8 + struct_never_constructed ×4（API 草案类型尚未构造）、unused_package ×1（`@string` 仅供测试文件用，包级导入在 lib 构建视角下判未用）。2026-09-23 已清掉：deprecated `inspect`→`debug_inspect`、unused_value（桩函数参数现在进入 abort 信息）、CLI 的 `@lib` 未使用（CLI 已升级为词典探测）。**CI 第一阶段用 `moon check` 不接 `--deny-warn`**，D9 起切到 `--deny-warn`。
 
 ## 八、实现步骤（完整路线图，按上游文件逐个移植）
 
@@ -130,7 +130,7 @@ zxcvbn(pw, user_inputs)
 - [x] 工具链安装、上游数据下载、项目骨架 `moon new`
 - [x] 词典数据嵌入 + 5 项去风险测试通过（最大不确定性已排除）
 - [x] `frequency_lists.mbt`（Dictionary 枚举 / build_ranked_dict / ranked_lookup）
-- [x] README.mbt.md（一句话定义、API、3 个使用场景、非目标、查重结论、许可）
+- [x] README.mbt.md（一句话定义、API、3 个使用场景、非目标、查重结论、许可；README.md 为同内容普通文件副本——GitHub 渲染用，曾因符号链接在 Windows git 侧无法 hash，2026-09-23 已修复）
 - [x] LICENSE 保留上游版权声明（MIT）
 - [x] **10 个有效 commits**（申报硬要求达成：`git log --oneline`）
 - [ ] `.github/workflows/` CI（check/test 双后端矩阵）——Phase 3（D11）补，申报后不影响
@@ -179,7 +179,7 @@ zxcvbn(pw, user_inputs)
 - `uppercase_variations`（`START_UPPER/END_UPPER/ALL_UPPER/ALL_LOWER` 四正则 → 按 `[[:upper:]]` 等 POSIX 类改写）
 - 测试：`scoring` 主 test 块的 entropy/guesses/分数断言（上游给了完整密码 → guesses/entropy/score 三元组表）
 
-**D8 时间估算 + feedback + 公共 API 收口**
+**D8 时间估算 + feedback + 公共 API 收口**（CLI 的词典探测模式已就绪：`moon run cmd/main -- "correct horse battery"` 可查每词命中与 rank）
 - `estimate_attack_times`（四场景）+ `display_time`（less than a second / X seconds / minutes / hours / days / months / years / centuries 分档，照上游公式）+ `guesses_to_score`
 - `feedback.get_feedback` + `get_match_feedback`（按最长匹配的 pattern 分支：dictionary/spatial/repeat/sequence/date/regex/bruteforce）
 - `zxcvbn()` 主函数 + `Entropy` 结果结构 + sanitize 用户输入
@@ -218,7 +218,7 @@ zxcvbn(pw, user_inputs)
 
 | 风险 | 概率 | 对策 |
 | --- | --- | --- |
-| 词典嵌入编译慢/体积大 | ~~高~~ **已排除** | 实测 2.7MB / 73 chunks 编译通过、测试 5/5；如需更小体积可改为发布时裁剪子集 |
+| 词典嵌入编译慢/体积大 | ~~高~~ **已排除** | 实测 961.8KB / 26 chunks 编译通过、测试 5/5（2026-09-23 另修正过一次数据源：曾误嵌未过滤 txt，已改为解析 frequency_lists.coffee，生成脚本含双源断言） |
 | core Regex 语义与 JS 正则差异（`\d`、锚点） | 中 | 全部改写为 POSIX 类并加针对性测试；date 匹配的上游正则逐个核对（D4） |
 | UTF-16 vs 字符粒度 | 中 | 一律 `for c in password`；emoji 测试用例锁定行为（D10） |
 | 排序比较器不一致导致 DP 打平选错序列 | 中 | 严格照上游 `sorted` 比较器 + 官方向量里的打平用例；差分对拍兜底 |

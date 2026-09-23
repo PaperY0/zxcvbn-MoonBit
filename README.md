@@ -81,9 +81,10 @@ python3 tools/gen_dictionaries.py   # 从 data/upstream 重新生成词典数据
 
 ## 当前状态（2026-09-23）
 
-✅ 工具链就绪（moon 0.1.20260920）· ✅ 上游数据下载解包 · ✅ 词典嵌入编译通过（961.8 KB /
-26 chunks，数据源为过滤后的 frequency_lists.coffee）· ✅ 骨架测试 5/5 通过 ·
-🚧 Phase 0 → Phase 1（数学底座 + 词典匹配）推进中。
+✅ 工具链就绪（moon 0.1.20260920）· ✅ 词典嵌入编译通过（961.8 KB / 26 chunks，
+数据源为上游过滤后的 frequency_lists.coffee，与 zxcvbn-rs 逐词一致）· ✅ 测试 5/5 通过 ·
+✅ CLI 词典探测可用（`moon run cmd/main -- "correct horse battery"`）·
+🚧 Phase 0 完成，Phase 1（数学底座 + 词典匹配）待开工。
 
 ---
 

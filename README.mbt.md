@@ -17,7 +17,7 @@ MoonBit 生态里没有一个**攻击模型驱动**的密码强度估计器：�
 
 ## 能力范围
 
-- **8 个模式匹配器**：频率词典（47k 常见密码 / 100k 维基词 / 男女名 / 88k 姓氏 / 39k 影视词）、
+- **8 个模式匹配器**：6 个频率词典（30k 常见密码 / 30k 维基词 / 3712 女名 / 983 男名 / 10k 姓氏 / 19160 影视词，共 93,855 词）、
   反向词典、l33t 替换（17 条替换表 + 子集枚举）、键盘空间（qwerty/dvorak/keypad/mac_keypad）、
   重复（`abcabcabc`）、序列（`abc`/`123`/`97531`）、正则（年份/纯数字）、日期（多格式 + 分隔符）
 - **最优匹配序列 DP**：动态规划取最小 guesses 的非重叠序列
@@ -30,7 +30,7 @@ MoonBit 生态里没有一个**攻击模型驱动**的密码强度估计器：�
 pub fn zxcvbn(
   password : String,
   user_inputs : Array[String],
-  reference_year~ : Int = 2026,
+  reference_year? : Int = 2026,
 ) -> Entropy
 
 pub struct Entropy {
@@ -73,15 +73,18 @@ python3 tools/gen_dictionaries.py   # 从 data/upstream 重新生成词典数据
 
 ## 数据与许可
 
-- 词典数据（6 个频率表，280,386 词条）与官方向量来自 `dropbox/zxcvbn`，**MIT License,
-  (c) Dropbox, Inc.**，见 [`data/README.md`](data/README.md)。
+- 词典数据（6 个频率表，93,855 词条）与官方向量来自 `dropbox/zxcvbn` 的
+  `src/frequency_lists.coffee`（上游运行时实际加载的过滤后词典，与 zxcvbn-rs 逐词一致），
+  **MIT License, (c) Dropbox, Inc.**，见 [`data/README.md`](data/README.md)。
 - 结构参考 `shssoichiro/zxcvbn-rs`（MIT）。
 - 本项目以 MIT 发布，LICENSE 保留上游版权声明。
 
 ## 当前状态（2026-09-23）
 
-✅ 工具链就绪（moon 0.1.20260920）· ✅ 上游数据下载解包 · ✅ 词典嵌入编译通过（2.7 MB /
-73 chunks）· ✅ 骨架测试 5/5 通过 · 🚧 Phase 0 → Phase 1（数学底座 + 词典匹配）推进中。
+✅ 工具链就绪（moon 0.1.20260920）· ✅ 词典嵌入编译通过（961.8 KB / 26 chunks，
+数据源为上游过滤后的 frequency_lists.coffee，与 zxcvbn-rs 逐词一致）· ✅ 测试 5/5 通过 ·
+✅ CLI 词典探测可用（`moon run cmd/main -- "correct horse battery"`）·
+🚧 Phase 0 完成，Phase 1（数学底座 + 词典匹配）待开工。
 
 ---
 
