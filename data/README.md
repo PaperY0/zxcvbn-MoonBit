@@ -9,7 +9,7 @@ data/
 ├── README.md                              # 本文件
 └── upstream/
     ├── dropbox-zxcvbn.tar.gz              # 上游原版快照（master, 2024-08-19 最后 push）
-    ├── dropbox-zxcvbn/                    # 解包：源码 + 词典 + 官方向量
+    ├── dropbox-zxcvbn/                    # 解包（已裁减）：源码 + 词典 + 官方向量（demo/dist 及遗留 CI 配置已移除）
     │   ├── LICENSE.txt                    # MIT, (c) Dropbox, Inc.
     │   ├── src/*.coffee                   # 7 个源文件（matching/scoring/time_estimates/feedback/adjacency_graphs/frequency_lists/main）
     │   ├── data/*.txt                     # 6 个频率词典（共 280,386 词条）
