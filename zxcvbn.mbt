@@ -72,5 +72,7 @@ pub fn zxcvbn(
   user_inputs : Array[String],
   reference_year? : Int = 2026,
 ) -> Entropy {
-  abort("Phase 1–2 实现中，见 docs/implementation-plan.md")
+  abort(
+    "zxcvbn engine not implemented yet (Phase 1–2); got password len=\{password.length()}, user_inputs=\{user_inputs.length()}, reference_year=\{reference_year}; see docs/implementation-plan.md",
+  )
 }

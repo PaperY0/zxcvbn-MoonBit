@@ -1,23 +1,48 @@
 ///|
-/// zxcvbn CLI。
+/// zxcvbn CLI（Phase 0 词典探测版）。
 ///
-/// 目标用法（Phase 2 实现后）：
+/// 当前状态：评分引擎（Phase 1–2）未实现，但词典数据与查询已可用。
+/// 本 CLI 展示已就绪的部分——按空格/连字符切分输入，报告每个 token 在 6 个
+/// 上游频率词典中的命中与 rank。 Phase 2 收口后会输出完整的
+/// score / guesses / log10 / 四场景破解时间 / 模式明细 / 建议。
+///
+/// 用法：
 /// ```bash
-/// moon run cmd/main -- "Tr0ub4dor&3"
+/// moon run cmd/main -- "password"        # 单个 token
+/// moon run cmd/main -- "correct horse"   # 多 token
 /// ```
-/// 输出：score / guesses / log10 / 四场景破解时间 / 命中模式 / 建议。
-///
-/// 当前为 Phase 0 骨架：参数解析已就位，评估逻辑待 Phase 1–2 移植完成后接入。
 fn main {
   let args = @env.args()
   match args {
-    [_, password, ..] => {
-      println("zxcvbn (moonbit) — Phase 0 skeleton")
-      println("input length: \{password.length()} chars (UTF-16 code units)")
+    [_, input, ..] => run(input)
+    _ =>
       println(
-        "evaluation engine: see docs/implementation-plan.md (Phase 1–2)",
+        "usage: moon run cmd/main -- \"<password or space-separated tokens>\"",
       )
-    }
-    _ => println("usage: moon run cmd/main -- \"<password>\"")
   }
+}
+
+///|
+/// 词典探测主流程。
+fn run(input : String) -> Unit {
+  println("zxcvbn (moonbit) — Phase 0 dictionary probe")
+  let chars = input.to_array()
+  let mut n = 0
+  for _c in chars {
+    n = n + 1
+  }
+  println("input: \{input}")
+  println("chars: \{n} (UTF-16 code units: \{input.length()})")
+  for token in input.split(" ") {
+    if token.length() == 0 {
+      continue
+    }
+    let lower = token.to_owned().to_lower()
+    match @lib.ranked_lookup(lower) {
+      Some((dict, rank)) =>
+        println("  \{token} -> hit \{dict.to_repr()} rank \{rank}")
+      None => println("  \{token} -> not in any dictionary")
+    }
+  }
+  println("scoring engine: docs/implementation-plan.md (Phase 1–2)")
 }
