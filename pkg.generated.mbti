@@ -1,0 +1,303 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "PaperY0/zxcvbn"
+
+import {
+  "moonbitlang/core/debug",
+  "moonbitlang/core/lazy",
+}
+
+// Values
+pub fn all_graphs() -> Array[(String, Map[Char, Array[(Char, Char)?]])]
+
+pub fn build_ranked_dict(Array[String]) -> Map[String, Int]
+
+pub let builtin_dictionaries : Array[(Dictionary, @lazy.Lazy[Map[String, Int]])]
+
+pub fn date_match(Array[Char], Int) -> Array[Match]
+
+pub let default_feedback : Feedback
+
+pub fn dictionary_match(Array[Char], Array[(Dictionary, Map[String, Int])], Int) -> Array[Match]
+
+pub fn dictionary_match_inner(Array[Char], Array[Char], Array[(Dictionary, Map[String, Int])], Int) -> Array[Match]
+
+pub fn english_wikipedia_list() -> Array[String]
+
+pub fn estimate_attack_times(Double) -> AttackTimes
+
+pub fn factorial(Int) -> Double
+
+pub fn female_names_list() -> Array[String]
+
+pub fn get_feedback(Int, Array[Match]) -> Feedback
+
+pub fn get_graph(String) -> Map[Char, Array[(Char, Char)?]]
+
+pub let graph_names : Array[String]
+
+pub fn guesses_to_score(Double) -> Int
+
+pub let keyboard_average_degree : Double
+
+pub let keyboard_starting_positions : Int
+
+pub let keypad_average_degree : Double
+
+pub let keypad_starting_positions : Int
+
+pub fn l33t_match(Array[Char], Array[(Dictionary, Map[String, Int])], Map[Char, Array[Char]], Int) -> Array[Match]
+
+pub fn log10(Double) -> Double
+
+pub fn log2(Double) -> Double
+
+pub fn male_names_list() -> Array[String]
+
+pub let max_dictionary_word_length : @lazy.Lazy[Int]
+
+pub fn mod_impl(Int, Int) -> Int
+
+pub fn most_guessable_match_sequence(String, Array[Match], Int, exclude_additive? : Bool) -> MatchSequence
+
+pub fn nCk(Int, Int) -> Double
+
+pub fn passwords_list() -> Array[String]
+
+pub fn ranked_lookup(String) -> (Dictionary, Int)?
+
+pub fn regex_match(Array[Char]) -> Array[Match]
+
+pub fn relevant_l33t_subtable(Array[Char], Map[Char, Array[Char]]) -> Map[Char, Array[Char]]
+
+pub fn repeat_match(Array[Char], Array[(Dictionary, Map[String, Int])], Int, Map[Char, Array[Char]], Int) -> Array[Match]
+
+pub fn reverse_dictionary_match(Array[Char], Array[(Dictionary, Map[String, Int])], Int) -> Array[Match]
+
+pub fn sequence_match(Array[Char]) -> Array[Match]
+
+pub fn sort_matches(Array[Match]) -> Array[Match]
+
+pub fn spatial_match(Array[Char], Array[(String, Map[Char, Array[(Char, Char)?]])]) -> Array[Match]
+
+pub fn surnames_list() -> Array[String]
+
+pub fn to_ascii_lower(Array[Char]) -> Array[Char]
+
+pub fn us_tv_and_film_list() -> Array[String]
+
+pub fn zxcvbn(String, Array[String], reference_year? : Int) -> Entropy
+
+pub fn zxcvbn_password(String) -> Entropy
+
+// Errors
+
+// Types and methods
+pub struct AttackTimes {
+  crack_times_seconds : CrackTimes
+  crack_times_display : CrackTimesDisplay
+  score : Int
+} derive(Eq, @debug.Debug)
+pub fn AttackTimes::equal(Self, Self) -> Bool
+pub fn AttackTimes::not_equal(Self, Self) -> Bool
+pub fn AttackTimes::to_repr(Self) -> @debug.Repr
+
+pub struct BruteforceMatch {
+  i : Int
+  j : Int
+  token : String
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn BruteforceMatch::equal(Self, Self) -> Bool
+pub fn BruteforceMatch::not_equal(Self, Self) -> Bool
+pub fn BruteforceMatch::to_repr(Self) -> @debug.Repr
+
+pub struct CrackTimes {
+  online_throttling_100_per_hour : Double
+  online_no_throttling_10_per_second : Double
+  offline_slow_hashing_1e4_per_second : Double
+  offline_fast_hashing_1e10_per_second : Double
+} derive(Eq, @debug.Debug)
+pub fn CrackTimes::equal(Self, Self) -> Bool
+pub fn CrackTimes::not_equal(Self, Self) -> Bool
+pub fn CrackTimes::to_repr(Self) -> @debug.Repr
+
+pub struct CrackTimesDisplay {
+  online_throttling_100_per_hour : String
+  online_no_throttling_10_per_second : String
+  offline_slow_hashing_1e4_per_second : String
+  offline_fast_hashing_1e10_per_second : String
+} derive(Eq, @debug.Debug)
+pub fn CrackTimesDisplay::equal(Self, Self) -> Bool
+pub fn CrackTimesDisplay::not_equal(Self, Self) -> Bool
+pub fn CrackTimesDisplay::to_repr(Self) -> @debug.Repr
+
+pub struct DateMatch {
+  i : Int
+  j : Int
+  token : String
+  separator : String
+  year : Int
+  month : Int
+  day : Int
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn DateMatch::equal(Self, Self) -> Bool
+pub fn DateMatch::not_equal(Self, Self) -> Bool
+pub fn DateMatch::to_repr(Self) -> @debug.Repr
+
+pub enum Dictionary {
+  Passwords
+  English
+  FemaleNames
+  MaleNames
+  Surnames
+  UsTvAndFilm
+  UserInputs
+} derive(Eq, @debug.Debug)
+pub fn Dictionary::equal(Self, Self) -> Bool
+pub fn Dictionary::not_equal(Self, Self) -> Bool
+pub fn Dictionary::to_repr(Self) -> @debug.Repr
+
+pub struct DictionaryMatch {
+  mut i : Int
+  mut j : Int
+  mut token : String
+  matched_word : String
+  rank : Int
+  dictionary_name : Dictionary
+  mut reversed : Bool
+  l33t : Bool
+  sub : Array[(Char, Char)]
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn DictionaryMatch::equal(Self, Self) -> Bool
+pub fn DictionaryMatch::not_equal(Self, Self) -> Bool
+pub fn DictionaryMatch::to_repr(Self) -> @debug.Repr
+
+pub struct Entropy {
+  password : String
+  guesses : Double
+  guesses_log10 : Double
+  score : Int
+  crack_times_seconds : CrackTimes
+  crack_times_display : CrackTimesDisplay
+  sequence : Array[Match]
+  feedback : Feedback
+} derive(Eq, @debug.Debug)
+pub fn Entropy::equal(Self, Self) -> Bool
+pub fn Entropy::not_equal(Self, Self) -> Bool
+pub fn Entropy::to_repr(Self) -> @debug.Repr
+
+pub struct Feedback {
+  warning : String
+  suggestions : Array[String]
+} derive(Eq, @debug.Debug)
+pub fn Feedback::equal(Self, Self) -> Bool
+pub fn Feedback::not_equal(Self, Self) -> Bool
+pub fn Feedback::to_repr(Self) -> @debug.Repr
+
+pub enum Match {
+  Bruteforce(BruteforceMatch)
+  Dictionary(DictionaryMatch)
+  Spatial(SpatialMatch)
+  Repeat(RepeatMatch)
+  Sequence(SequenceMatch)
+  Regex(RegexMatch)
+  Date(DateMatch)
+} derive(Eq, @debug.Debug)
+pub fn Match::describe(Self) -> String
+pub fn Match::end_index(Self) -> Int
+pub fn Match::equal(Self, Self) -> Bool
+pub fn Match::guesses(Self) -> Double
+pub fn Match::guesses_log10(Self) -> Double
+pub fn Match::not_equal(Self, Self) -> Bool
+pub fn Match::pattern(Self) -> String
+pub fn Match::set_guesses(Self, Double) -> Unit
+pub fn Match::set_guesses_log10(Self, Double) -> Unit
+pub fn Match::span_length(Self) -> Int
+pub fn Match::start_index(Self) -> Int
+pub fn Match::to_repr(Self) -> @debug.Repr
+pub fn Match::token(Self) -> String
+
+pub struct MatchSequence {
+  password : String
+  guesses : Double
+  guesses_log10 : Double
+  sequence : Array[Match]
+} derive(Eq, @debug.Debug)
+pub fn MatchSequence::equal(Self, Self) -> Bool
+pub fn MatchSequence::not_equal(Self, Self) -> Bool
+pub fn MatchSequence::to_repr(Self) -> @debug.Repr
+
+pub struct Omnimatcher {
+  dictionaries : Array[(Dictionary, Map[String, Int])]
+  max_word_length : Int
+  reference_year : Int
+} derive(Eq, @debug.Debug)
+pub fn Omnimatcher::equal(Self, Self) -> Bool
+pub fn Omnimatcher::new(Map[String, Int], Int) -> Self
+pub fn Omnimatcher::not_equal(Self, Self) -> Bool
+pub fn Omnimatcher::run(Self, String) -> Array[Match]
+pub fn Omnimatcher::to_repr(Self) -> @debug.Repr
+
+pub struct RegexMatch {
+  i : Int
+  j : Int
+  token : String
+  regex_name : String
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn RegexMatch::equal(Self, Self) -> Bool
+pub fn RegexMatch::not_equal(Self, Self) -> Bool
+pub fn RegexMatch::to_repr(Self) -> @debug.Repr
+
+pub struct RepeatMatch {
+  i : Int
+  j : Int
+  token : String
+  base_token : String
+  base_guesses : Double
+  base_matches : Array[Match]
+  repeat_count : Int
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn RepeatMatch::equal(Self, Self) -> Bool
+pub fn RepeatMatch::not_equal(Self, Self) -> Bool
+pub fn RepeatMatch::to_repr(Self) -> @debug.Repr
+
+pub struct SequenceMatch {
+  i : Int
+  j : Int
+  token : String
+  sequence_name : String
+  sequence_space : Int
+  ascending : Bool
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn SequenceMatch::equal(Self, Self) -> Bool
+pub fn SequenceMatch::not_equal(Self, Self) -> Bool
+pub fn SequenceMatch::to_repr(Self) -> @debug.Repr
+
+pub struct SpatialMatch {
+  i : Int
+  j : Int
+  token : String
+  graph : String
+  turns : Int
+  shifted_count : Int
+  mut guesses : Double
+  mut guesses_log10 : Double
+} derive(Eq, @debug.Debug)
+pub fn SpatialMatch::equal(Self, Self) -> Bool
+pub fn SpatialMatch::not_equal(Self, Self) -> Bool
+pub fn SpatialMatch::to_repr(Self) -> @debug.Repr
+
+// Type aliases
+
+// Traits

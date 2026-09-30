@@ -2,10 +2,13 @@
 
 > 项目：`PaperY0/zxcvbn`（仓库目录 `zxcvbn-moonbit/`）
 > 选题：将 Dropbox 开源 **zxcvbn** 密码强度估计器移植到 MoonBit
-> 状态：**选题已固定**；旧候选选题（Bloom Filter / Cron / Humanize 等）已全部删除
+> 状态：**Phase 0–2 完成**（评分引擎 + 官方向量 + 边界测试全部落地）；旧候选选题已全部删除
 > 查重：三轮复查（mooncakes 2622 模块 + GitHub + awesome + core/x + 官方 moon search）——**MoonBit 生态无同类库，0 重复**
 > 实验前数据：**已全部配好并验证**（工具链 / 上游数据 / 项目骨架 / 词典嵌入编译运行测试 5/5 通过）
 > 整理日期：2026-09-23（Asia/Shanghai）
+
+实现进度（2026-09-28）：评分引擎 8 个匹配器、DP、每模式 guesses、破解时间、建议文案全部落地；
+`moon check` 0 error / 0 warning；`moon test` **53/53 通过**（含上游 22 个官方向量 test 块全部转写）。
 
 ---
 

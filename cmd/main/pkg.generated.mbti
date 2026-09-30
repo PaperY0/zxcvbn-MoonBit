@@ -1,0 +1,13 @@
+// Generated using `moon info`, DON'T EDIT IT
+package "PaperY0/zxcvbn/cmd/main"
+
+// Values
+
+// Errors
+
+// Types and methods
+type CliOptions
+
+// Type aliases
+
+// Traits
