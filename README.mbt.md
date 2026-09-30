@@ -3,6 +3,7 @@
 > Dropbox [zxcvbn](https://github.com/dropbox/zxcvbn) 密码强度估计器的 MoonBit 移植。
 > 输入密码字符串，输出 **0–4 强度分 + 熵值（guesses/log10）+ 四场景破解时间 + 命中的模式明细 + 改进建议**。
 
+[![CI](https://github.com/PaperY0/MoonBit/actions/workflows/ci.yml/badge.svg)](https://github.com/PaperY0/MoonBit/actions/workflows/ci.yml)
 [English below](#papery0zxcvbn-en)
 
 ## 为什么是它
