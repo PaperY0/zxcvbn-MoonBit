@@ -246,3 +246,16 @@ zxcvbn(pw, user_inputs)
 - 现有 4 个"密码强度"库逐个读源码：全部 LUDS 字符计数范式，无攻击模型/熵/模式匹配（详见查重报告第三节）
 - `moonbitlang/core`（70 包）/ `x`（24 包）：无此能力，`x/bcrypt` 是互补的口令哈希
 - awesome-moonbit：全部关键词 0 次
+
+## 十三、目前已完成部分（2026-09-30 追加）
+
+- **评分引擎完整**：8 个匹配器（词典/反向/l33t/键盘空间/重复/序列/正则/日期）+ 最小 guesses DP + 每模式猜测数 + uppercase/l33t 变体
+- **输出完整**：guesses/log10、0–4 分、四场景破解秒数与人类可读时长、warning + suggestions
+- **官方向量**：上游 22 个 test 块全部转写通过（含 genpws 变体矩阵）
+- **验收数据**：`moon check` 0 error / 0 warning；wasm / wasm-gc / js 三后端各 53/53
+- **独立差分对拍**：对 npm 官方 zxcvbn@4.4.2 跑 287 个密码，282 例逐字段（guesses/score/sequence/display/feedback）完全一致，其余 5 例为已声明的 recent_year 范围升级，0 失败
+- **CLI**：完整结果 + `--json` / `--user` / `--year`
+- **数据可复现**：键盘邻接图与 93,855 词条词典均由 `tools/` 脚本生成，重跑 + `moon fmt` 后与提交版 0 diff
+- **CI**：三后端测试矩阵 + fmt/check/接口校验门禁
+- **已提交并推送**：29 个 commits，工作树干净；`PaperY0/MoonBit` 与报名仓库 `PaperY0/zxcvbn-MoonBit` 均已更新至最新
+- **未完成（不阻塞）**：`DIFF-REPORT.md`、mooncakes.io 发布、demo/ 演示页
