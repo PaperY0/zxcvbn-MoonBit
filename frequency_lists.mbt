@@ -11,6 +11,12 @@ pub enum Dictionary {
 } derive(Eq, Debug)
 
 ///|
+pub extend Dictionary with Eq::{equal, not_equal}
+
+///|
+pub extend Dictionary with @debug.Debug::{to_repr}
+
+///|
 /// 由有序词表构建 rank 表。
 ///
 /// rank 为 1-based 行序；重复词**后者覆盖前者**——与上游 `build_ranked_dict`
@@ -79,4 +85,50 @@ pub fn ranked_lookup(word : String) -> (Dictionary, Int)? {
     }
   }
   None
+}
+
+///|
+/// 全部内置频率词典，顺序与上游 `RANKED_DICTIONARIES` 的构造顺序一致。
+/// 匹配器（dictionary_match / reverse_dictionary_match / l33t_match）按这个顺序遍历。
+pub let builtin_dictionaries : Array[(Dictionary, Lazy[Map[String, Int]])] = [
+  (Passwords, passwords_dict),
+  (English, english_dict),
+  (FemaleNames, female_names_dict),
+  (MaleNames, male_names_dict),
+  (Surnames, surnames_dict),
+  (UsTvAndFilm, us_tv_and_film_dict),
+]
+
+///|
+/// 内置词典中最长词条的**字符数**（按 Unicode 标量值计）。
+///
+/// `dictionary_match` 只需枚举到这个长度：更长的子串不可能命中任何词条。
+/// 这是与上游**语义完全等价**的裁剪（上游枚举全部长度，结果必然为空），
+/// 但把词典匹配从 O(n²) 次哈希查询降到 O(n × 最长词长)，长密码收益巨大。
+pub let max_dictionary_word_length : Lazy[Int] = Lazy(() => {
+  let lists : Array[Array[String]] = [
+    passwords_list(),
+    english_wikipedia_list(),
+    female_names_list(),
+    male_names_list(),
+    surnames_list(),
+    us_tv_and_film_list(),
+  ]
+  let mut longest = 1
+  for list in lists {
+    for word in list {
+      let len = word.to_array().length()
+      if len > longest {
+        longest = len
+      }
+    }
+  }
+  longest
+})
+
+///|
+/// `frequency_lists.coffee` 在 ASCII 小写字母域内过滤，但词典里确实存在少量
+/// 非 ASCII 词条。这里把它们转成 ASCII 小写以对齐 `Array[Char]` 的匹配口径。
+pub fn to_ascii_lower(chars : Array[Char]) -> Array[Char] {
+  chars.map(c => c.to_ascii_lowercase())
 }
