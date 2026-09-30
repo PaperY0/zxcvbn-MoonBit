@@ -1,0 +1,58 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  # check/test/format 三件套，跨三个后端跑测试。
+  # 固定 moon 版本与仓库里 docs/implementation-plan.md 记录的工具链一致。
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        target: [wasm, wasm-gc, js]
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Set up MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+
+      - name: Versions
+        run: |
+          moon version --all
+          moon update
+
+      - name: Format check
+        run: moon fmt --check
+
+      - name: Check
+        run: moon check
+
+      - name: Test (${{ matrix.target }})
+        run: moon test --target ${{ matrix.target }}
+
+      - name: CLI smoke test (${{ matrix.target }})
+        if: matrix.target == 'wasm'
+        run: |
+          moon run cmd/main -- "correcthorsebatterystaple"
+
+  # `moon info` 生成的接口若与提交不一致，说明 .mbti 忘了更新。
+  interface:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - name: Set up MoonBit
+        run: |
+          curl -fsSL https://cli.moonbitlang.com/install/unix.sh | bash
+          echo "$HOME/.moon/bin" >> $GITHUB_PATH
+      - name: moon info + fmt (must be a no-op)
+        run: |
+          moon info
+          moon fmt
+          git diff --exit-code -- '*.mbti' '*.mbt'
