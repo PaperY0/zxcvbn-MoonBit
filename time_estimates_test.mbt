@@ -1,8 +1,8 @@
 // time_estimates.mbt 的黑盒测试。
 //
 // 上游没有为 time_estimates 单独写 test 块，这里按其公式补齐：
-// display_time 的分档逻辑（含上游 `Math.round(seconds) / minute` 的算式特点）
-// 与 guesses_to_score 的 1e3/1e6/1e8/1e10 + DELTA=5 阈值。
+// display_time 的分档逻辑（上游实际编译为 `Math.round(seconds / minute)`，
+// 先除后圆整、结果为整数）与 guesses_to_score 的 1e3/1e6/1e8/1e10 + DELTA=5 阈值。
 
 ///|
 test "guesses_to_score thresholds (1e3/1e6/1e8/1e10 + DELTA 5)" {
@@ -46,8 +46,8 @@ test "estimate_attack_times computes all four scenarios" {
 }
 
 ///|
-/// display_time 分档。注意上游算式是 `Math.round(seconds) / minute` 而不是
-/// `Math.round(seconds / minute)`，因此会产出 `1.5 minutes` 这样的分数。
+/// display_time 分档。上游 `Math.round seconds / minute` 实际编译为
+/// `Math.round(seconds / minute)`——先除后圆整，各档显示整数。
 test "display_time buckets" {
   // guesses=1：限流场景 36 秒，其余均小于 1 秒
   let t = @zxcvbn.estimate_attack_times(1.0)
@@ -107,13 +107,19 @@ test "display_time buckets" {
 }
 
 ///|
-/// 上游算式会产出分数形式（如 `1.5 minutes`），本项目如实保留。
-test "display_time can produce fractional buckets" {
-  // guesses=90 => online_no_throttling = 9s；拿出来 90 秒本身
-  let t = @zxcvbn.estimate_attack_times(900.0)
-  // 900/10 = 90 秒 => 90/60 = 1.5 => "1.5 minutes"
+/// 分档边界按 `Math.round(seconds / unit)` 圆整：60 秒 → 1 分钟，
+/// 90 秒 → 2 分钟（JS 的 Math.round 对 .5 向上取整），不会出现分数形式。
+test "display_time rounds to integers at bucket boundaries" {
+  // guesses=600 => online_no_throttling = 60 秒，恰好进入分钟档 => round(60/60)=1
+  let t = @zxcvbn.estimate_attack_times(600.0)
   inspect(
     t.crack_times_display.online_no_throttling_10_per_second,
-    content="1.5 minutes",
+    content="1 minute",
+  )
+  // guesses=900 => 90 秒 => round(90/60)=round(1.5)=2
+  let t = @zxcvbn.estimate_attack_times(900.0)
+  inspect(
+    t.crack_times_display.online_no_throttling_10_per_second,
+    content="2 minutes",
   )
 }

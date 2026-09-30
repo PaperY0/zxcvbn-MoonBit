@@ -93,8 +93,11 @@ pub fn guesses_to_score(guesses : Double) -> Int {
 ///|
 /// 上游 `display_time`。
 ///
-/// 注意上游的算式是 `Math.round(seconds) / minute` 而不是 `Math.round(seconds/minute)`，
-/// 于是会产出 `1.5 minutes` 这样的分数形式——本项目如实保留以对齐官方向量。
+/// 上游 CoffeeScript 源写作 `Math.round seconds / minute`。CoffeeScript 的函数调用
+/// 会吞掉其右侧整个表达式，实际编译为 `Math.round(seconds / minute)`——**先除后
+/// 圆整**，结果是整数（如 90 秒 → "2 minutes"）。此前误读为
+/// `Math.round(seconds) / minute`（先圆整再除），会错误地产出 "1.5 minutes" 这样
+/// 的分数形式。已用 CS 1.10.0 编译产物与 npm zxcvbn@4.4.2 双重核实。
 fn display_time(seconds : Double) -> String {
   let minute = 60.0
   let hour = minute * 60.0
@@ -108,19 +111,19 @@ fn display_time(seconds : Double) -> String {
     let base = @math.round(seconds)
     ("\{base} second", base)
   } else if seconds < hour {
-    let base = @math.round(seconds) / minute
+    let base = @math.round(seconds / minute)
     ("\{base} minute", base)
   } else if seconds < day {
-    let base = @math.round(seconds) / hour
+    let base = @math.round(seconds / hour)
     ("\{base} hour", base)
   } else if seconds < month {
-    let base = @math.round(seconds) / day
+    let base = @math.round(seconds / day)
     ("\{base} day", base)
   } else if seconds < year {
-    let base = @math.round(seconds) / month
+    let base = @math.round(seconds / month)
     ("\{base} month", base)
   } else if seconds < century {
-    let base = @math.round(seconds) / year
+    let base = @math.round(seconds / year)
     ("\{base} year", base)
   } else {
     ("centuries", -1.0)

@@ -213,6 +213,66 @@ fn print_json(result : @lib.Entropy) -> Unit {
 }
 
 ///|
+/// 按 RFC 8259 转义字符串内容。
+///
+/// 注意：MoonBit 核心库的 `String::replace` 与 JS 同名方法一致，**只替换第一个**
+/// 匹配；此前用链式 `replace` 转义，遇到含两个及以上引号的反馈文案（如 repeat
+/// 警告 `Repeats like "aaa" are easy to guess`）会产出非法 JSON。这里改为逐字符
+/// 遍历，并补齐控制字符（< 0x20）的转义。
 fn json_string(s : String) -> String {
-  "\"" + s.replace(old="\\", new="\\\\").replace(old="\"", new="\\\"") + "\""
+  let b = StringBuilder()
+  b.write_char('"')
+  for c in s {
+    match c {
+      '"' => {
+        b.write_char('\\')
+        b.write_char('"')
+      }
+      '\\' => {
+        b.write_char('\\')
+        b.write_char('\\')
+      }
+      '\n' => {
+        b.write_char('\\')
+        b.write_char('n')
+      }
+      '\r' => {
+        b.write_char('\\')
+        b.write_char('r')
+      }
+      '\t' => {
+        b.write_char('\\')
+        b.write_char('t')
+      }
+      '\u0008' => {
+        b.write_char('\\')
+        b.write_char('b')
+      }
+      '\u000C' => {
+        b.write_char('\\')
+        b.write_char('f')
+      }
+      _ => {
+        let n = c.to_int()
+        if n < 0x20 {
+          b.write_string("\\u00")
+          b.write_char(hex_digit(n / 16))
+          b.write_char(hex_digit(n % 16))
+        } else {
+          b.write_char(c)
+        }
+      }
+    }
+  }
+  b.write_char('"')
+  b.to_string()
+}
+
+///|
+fn hex_digit(n : Int) -> Char {
+  if n < 10 {
+    ('0'.to_int() + n).to_char().unwrap()
+  } else {
+    ('a'.to_int() + n - 10).to_char().unwrap()
+  }
 }
