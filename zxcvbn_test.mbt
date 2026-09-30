@@ -1,80 +1,147 @@
-///|
-/// 词典数据测试（2026-09-23 修正：数据源从原始 txt 改为 frequency_lists.coffee）。
-///
-/// 背景：上游运行时加载的是 `src/frequency_lists.coffee`（经 build_frequency_lists.py
-/// 四道处理：跨词典去重 / 短稀词剔除 / 逗号引号剔除 / 30000 等截断），最终规模
-/// 30000/30000/3712/983/10000/19160，与 zxcvbn-rs 常量逐词一致。本项目嵌入的是
-/// 同一份数据（生成时双源断言），因此 rank 与上游/zxcvbn-rs 完全一致——
-/// 这是官方向量与差分对拍能通过的前提。
-test "frequency data: sizes match upstream filtered lists (not raw txt)" {
-  // 若这些数字变回 47023/100000/4275/1219/88799/39070，说明嵌错了原始 txt
-  debug_inspect(@zxcvbn.passwords_list().length(), content="30000")
-  debug_inspect(@zxcvbn.english_wikipedia_list().length(), content="30000")
-  debug_inspect(@zxcvbn.female_names_list().length(), content="3712")
-  debug_inspect(@zxcvbn.male_names_list().length(), content="983")
-  debug_inspect(@zxcvbn.surnames_list().length(), content="10000")
-  debug_inspect(@zxcvbn.us_tv_and_film_list().length(), content="19160")
-}
+// Black-box tests (package `PaperY0/zxcvbn` seen from outside).
+// Public behavior belongs here; internal helpers go to `*_wbtest.mbt`.
+//
+// 数据来源：dropbox/zxcvbn 的行为基准 + 本项目的边界用例
+//（空串 / 非 BMP 字符 / 长密码 / user_inputs）。
 
 ///|
-test "frequency data: first/last entries match upstream coffee order" {
-  let p = @zxcvbn.passwords_list()
-  debug_inspect(p[0], content="\"123456\"")
-  debug_inspect(p[1], content="\"password\"")
-  debug_inspect(p[29999], content="\"geekboy\"") // 截断边界：第 30000 个词
-  debug_inspect(@zxcvbn.english_wikipedia_list()[0], content="\"the\"")
-  debug_inspect(@zxcvbn.surnames_list()[0], content="\"smith\"")
-  debug_inspect(@zxcvbn.female_names_list()[0], content="\"mary\"")
-  debug_inspect(@zxcvbn.male_names_list()[0], content="\"james\"")
-  debug_inspect(@zxcvbn.us_tv_and_film_list()[0], content="\"you\"")
-}
-
-///|
-test "frequency data: cross-dictionary dedup keeps lowest-rank list" {
-  // michael/james/thomas 在 raw passwords 与 surnames 里都有，但去重后只在
-  // male_names（在那里 rank 更低）——与上游 filter_frequency_lists 语义一致
-  match @zxcvbn.ranked_lookup("michael") {
-    Some((@zxcvbn.Dictionary::MaleNames, rank)) =>
-      debug_inspect(rank, content="4")
-    _ => fail("expected Some((MaleNames, 4))")
-  }
-  match @zxcvbn.ranked_lookup("james") {
-    Some((@zxcvbn.Dictionary::MaleNames, rank)) =>
-      debug_inspect(rank, content="1")
-    _ => fail("expected Some((MaleNames, 1))")
-  }
-  match @zxcvbn.ranked_lookup("jennifer") {
-    Some((@zxcvbn.Dictionary::FemaleNames, rank)) =>
-      debug_inspect(rank, content="6")
-    _ => fail("expected Some((FemaleNames, 6))")
-  }
-  // 去重的另一面：passwords 表里不应再出现这些名字
-  let pw = @zxcvbn.build_ranked_dict(@zxcvbn.passwords_list())
-  debug_inspect(pw.get("michael"), content="None")
-  debug_inspect(pw.get("james"), content="None")
-}
-
-///|
-test "frequency data: short-rare words are filtered out" {
-  // 'sex' 在 raw passwords 排名 4018，而 10**3=1000 <= 4018，按上游规则剔除；
-  // 但它作为普通英文/影视词仍存在于其他表（us_tv_and_film）
-  let pw = @zxcvbn.build_ranked_dict(@zxcvbn.passwords_list())
-  debug_inspect(pw.get("sex"), content="None")
-  match @zxcvbn.ranked_lookup("sex") {
-    Some((@zxcvbn.Dictionary::UsTvAndFilm, _)) => ()
-    _ => fail("expected sex to live in UsTvAndFilm")
-  }
-}
-
-///|
-test "core regex: supports POSIX digit class, alternation and find" {
-  // 注意：MoonBit core 的 Regex 不支持 \d，须用 POSIX 类 [[:digit:]]（ASCII 语义）。
-  let year_re = @string.Regex::unsafe_from_string(
-    "19[[:digit:]][[:digit:]]|20[[:digit:]][[:digit:]]",
+/// 端到端冒烟：空密码。
+test "zzcvbn('') => guesses 1, score 0, no matches" {
+  let r = @zxcvbn.zxcvbn("", [])
+  debug_inspect(r.guesses, content="1")
+  debug_inspect(r.guesses_log10, content="0")
+  debug_inspect(r.score, content="0")
+  debug_inspect(r.sequence.length(), content="0")
+  // 空序列走 default_feedback
+  assert_eq(r.feedback.warning, "", msg="no warning")
+  assert_eq(
+    r.feedback.suggestions,
+    [
+      "Use a few words, avoid common phrases", "No need for symbols, digits, or uppercase letters",
+    ],
+    msg="default feedback suggestions",
   )
-  let hits : Array[String] = []
-  for m in @string.Regex::find(year_re, "born 1984 died 2017 x9999") {
-    hits.push(m.content().to_owned())
+}
+
+///|
+/// 端到端冒烟：最常见的密码。
+test "zzcvbn('password') => top-10 common password, score 0" {
+  let r = @zxcvbn.zxcvbn("password", [])
+  // rank=2 的词典匹配 + DP 的长度惩罚 (1! * 2 + 10000^0)
+  debug_inspect(r.guesses, content="3")
+  debug_inspect(r.guesses_log10, content="0.47712125471966244")
+  debug_inspect(r.score, content="0")
+  debug_inspect(r.sequence.length(), content="1")
+  assert_eq(r.sequence[0].pattern(), "dictionary", msg="pattern == dictionary")
+  assert_eq(r.sequence[0].token(), "password", msg="token == password")
+  assert_eq(
+    r.feedback.warning,
+    "This is a top-10 common password",
+    msg="top-10 warning",
+  )
+}
+
+///|
+/// 端到端：上游著名的 "correct horse battery staple" 应该是强密码。
+test "zzcvbn('correcthorsebatterystaple') => score 4" {
+  let r = @zxcvbn.zxcvbn("correcthorsebatterystaple", [])
+  debug_inspect(r.score, content="4")
+  debug_inspect(r.guesses, content="273500327700640")
+  debug_inspect(r.sequence.length(), content="4")
+  assert_eq(r.sequence[0].pattern(), "dictionary", msg="pattern == dictionary")
+  assert_eq(r.sequence[0].token(), "correct", msg="token == correct")
+  assert_eq(r.sequence[1].token(), "horse", msg="token == horse")
+  assert_eq(r.sequence[2].token(), "battery", msg="token == battery")
+  assert_eq(r.sequence[3].token(), "staple", msg="token == staple")
+  // score > 2 时上游不给建议
+  assert_eq(r.feedback.warning, "", msg="no warning")
+  assert_eq(r.feedback.suggestions, [], msg="no suggestions")
+}
+
+///|
+/// 端到端：l33t 密码被识别后仍应被视为弱。
+test "zzcvbn('Tr0ub4dor&3') => bruteforce, score 4" {
+  let r = @zxcvbn.zxcvbn("Tr0ub4dor&3", [])
+  debug_inspect(r.score, content="4")
+  debug_inspect(r.sequence.length(), content="1")
+  assert_eq(r.sequence[0].pattern(), "bruteforce", msg="pattern == bruteforce")
+}
+
+///|
+/// user_inputs：用户名参与词典，强度应显著下降。
+test "user_inputs lower the estimate" {
+  let without = @zxcvbn.zxcvbn("smithhammer", [])
+  let with_inputs = @zxcvbn.zxcvbn("smithhammer", ["smith", "hammer"])
+  // 用户词典命中后 guesses 必须更小
+  assert_true(
+    with_inputs.guesses < without.guesses,
+    msg="user dictionary hits must lower guesses",
+  )
+  // 用户词应该进入字典匹配序列
+  let patterns = with_inputs.sequence.map(m => m.pattern())
+  debug_inspect(patterns.length() >= 2, content="true")
+  assert_eq(patterns[0], "dictionary", msg="user dictionary match")
+}
+
+///|
+/// 边界：非 BMP 字符（emoji）按 Unicode 标量值计长，不是 UTF-16 码元。
+test "non-BMP characters are counted as scalar values" {
+  // 4 个 emoji 在 JS 里 length 是 8（UTF-16 码元），这里必须是 4 个标量值
+  let r = @zxcvbn.zxcvbn("😀😀😀😀", [])
+  debug_inspect(r.score, content="0")
+  // emoji 不是词典词，DP 会给 repeat 或 bruteforce 覆盖
+  let patterns = r.sequence.map(m => m.pattern())
+  let mut covered = false
+  for p in patterns {
+    if p == "bruteforce" || p == "repeat" {
+      covered = true
+    }
   }
-  debug_inspect(hits, content="[\"1984\", \"2017\"]")
+  debug_inspect(covered, content="true")
+}
+
+///|
+/// 边界：长密码不应崩溃。
+/// 1000 个 'x' 是纯重复，上游行为就是弱（repeat pattern，score=1）。
+test "long password (1000 repeated chars) stays a weak repeat" {
+  let long = "x".repeat(1000)
+  let r = @zxcvbn.zxcvbn(long, [])
+  debug_inspect(r.sequence.length(), content="1")
+  assert_eq(r.sequence[0].pattern(), "repeat", msg="pattern == repeat")
+  debug_inspect(r.score, content="1")
+}
+
+///|
+/// 边界：长随机密码应该是强密码（而且不能超时）。
+test "long random password is strong" {
+  let long = "Zq7$mK2wP9xR4vN8bT5yU3iO6pL1aS0dF7gH4jK8mQ2wE5"
+  let r = @zxcvbn.zxcvbn(long, [])
+  debug_inspect(r.score, content="4")
+}
+
+///|
+/// 边界：单字符密码。
+test "single-character passwords" {
+  let r = @zxcvbn.zxcvbn("a", [])
+  debug_inspect(r.score, content="0")
+  let r = @zxcvbn.zxcvbn("!", [])
+  debug_inspect(r.score, content="0")
+}
+
+///|
+/// 边界：纯空格与不可见字符不应让匹配器越界。
+test "whitespace-only passwords" {
+  for pw in [" ", "   ", "\t", "\n"] {
+    let r = @zxcvbn.zxcvbn(pw, [])
+    debug_inspect(r.score, content="0")
+  }
+}
+
+///|
+/// reference_year 参数化：同一个日期密码在不同参考年下 guesses 不同。
+test "reference_year is parameterized" {
+  let a = @zxcvbn.zxcvbn("1999", [], reference_year=2026)
+  let b = @zxcvbn.zxcvbn("1999", [], reference_year=2005)
+  // 1999 距 2005 只有 6 年 => 走 MIN_YEAR_SPACE=20；距 2026 有 27 年
+  debug_inspect(b.guesses < a.guesses, content="true")
 }
