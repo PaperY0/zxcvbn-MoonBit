@@ -122,7 +122,13 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
 
 ```bash
 moon check   # 0 error，0 warning
-moon test    # 53/53
+moon test    # 53/53（默认 wasm 后端）
+
+# 三个后端都全绿（验证“纯计算、无 IO 依赖”的声明）
+moon test --target wasm     # 53/53
+moon test --target wasm-gc  # 53/53
+moon test --target js       # 53/53
+
 moon run cmd/main -- "correct horse battery staple"
 ```
 
