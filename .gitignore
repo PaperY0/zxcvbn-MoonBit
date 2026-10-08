@@ -4,5 +4,6 @@ target/
 target
 .mooncakes/
 .moonagent/
+trace.json
 # upstream data snapshots (extracted copies are kept; tarballs are regenerable)
 data/upstream/*.tar.gz
