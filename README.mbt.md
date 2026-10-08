@@ -3,7 +3,7 @@
 > Dropbox [zxcvbn](https://github.com/dropbox/zxcvbn) 密码强度估计器的 MoonBit 移植。
 > 输入密码字符串，输出 **0–4 强度分 + 熵值（guesses/log10）+ 四场景破解时间 + 命中的模式明细 + 改进建议**。
 
-[![CI](https://github.com/PaperY0/MoonBit/actions/workflows/ci.yml/badge.svg)](https://github.com/PaperY0/MoonBit/actions/workflows/ci.yml)
+[![CI](https://github.com/PaperY0/zxcvbn-MoonBit/actions/workflows/ci.yml/badge.svg)](https://github.com/PaperY0/zxcvbn-MoonBit/actions/workflows/ci.yml)
 [English below](#papery0zxcvbn-en)
 
 ## 为什么是它
@@ -166,6 +166,7 @@ moon test           # 测试
 moon run cmd/main -- "password"
 python3 tools/gen_dictionaries.py      # 从 data/upstream 重新生成词典数据模块
 python3 tools/gen_adjacency_graphs.py  # 从数据/upstream 重新生成键盘邻接图模块
+# 两个生成器的产物需再跑一次 moon fmt（生成器不保证 fmt-clean，CI 的 fmt 门禁会校验）
 ```
 
 ## 数据与许可
@@ -176,12 +177,13 @@ python3 tools/gen_adjacency_graphs.py  # 从数据/upstream 重新生成键盘�
 - 结构参考 `shssoichiro/zxcvbn-rs`（MIT）。
 - 本项目以 MIT 发布，LICENSE 保留上游版权声明。
 
-## 当前状态（2026-09-28）
+## 当前状态（2026-09-30）
 
 ✅ 评分引擎完整实现（8 匹配器 + DP + 每模式 guesses + 破解时间 + 建议）·
 ✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 53/53 测试通过 · ✅ `moon check` 0 error / 0 warning ·
 ✅ CLI 输出完整结果与 JSON · ✅ 键盘邻接图数据由脚本生成（可复现）·
-🚧 Phase 3 剩余：CI 矩阵、多后端（wasm-gc/js/native）测试、`DIFF-REPORT.md` 差分对拍、mooncakes 发布。
+✅ CI：wasm / wasm-gc / js 三后端测试矩阵 + fmt/check/接口校验门禁 ·
+🚧 Phase 3 剩余：`DIFF-REPORT.md` 系统性差分对拍、mooncakes 发布、demo/ wasm 演示页。
 
 ---
 
@@ -192,7 +194,8 @@ python3 tools/gen_adjacency_graphs.py  # 从数据/upstream 重新生成键盘�
 A MoonBit port of Dropbox's [zxcvbn](https://github.com/dropbox/zxcvbn) password strength
 estimator: pattern-matching based (dictionaries, l33t, keyboard adjacency, dates, sequences,
 repeats), minimum-guesses DP scoring, 0–4 score, crack-time estimation, and actionable
-feedback. Pure computation, no IO, compiles to wasm / wasm-gc / js / native.
+feedback. Pure computation, no IO; the wasm / wasm-gc / js targets are verified in CI
+(the native target is also supported by the toolchain but not covered by CI).
 
 ```moonbit nocheck
 let result = @zxcvbn.zxcvbn("Tr0ub4dor&3", ["bob", "bob@example.com"])

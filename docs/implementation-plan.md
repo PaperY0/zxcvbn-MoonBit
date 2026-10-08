@@ -258,4 +258,5 @@ zxcvbn(pw, user_inputs)
 - **数据可复现**：键盘邻接图与 93,855 词条词典均由 `tools/` 脚本生成，重跑 + `moon fmt` 后与提交版 0 diff
 - **CI**：三后端测试矩阵 + fmt/check/接口校验门禁
 - **已提交并推送**：29 个 commits，工作树干净；`PaperY0/MoonBit` 与报名仓库 `PaperY0/zxcvbn-MoonBit` 均已更新至最新
+- **仓库统一（2026-10-08）**：正式仓库定为 `PaperY0/zxcvbn-MoonBit`（与申报书、上传 bundle 一致）。`PaperY0/MoonBit` 原为开发期使用的通用仓库，自本次切换起不再接收推送，不再作为提交与验收入口。同步修正 `moon.mod` 的 `repository` 字段、`README.mbt.md` 的 CI 徽章，并把《README.mbt.md》对齐到《README.md》（`moon.mod` 的 `readme` 指向前者，此前它停留在 9-28 版本，mooncakes 页面会渲染出过期内容）
 - **未完成（不阻塞）**：`DIFF-REPORT.md`、mooncakes.io 发布、demo/ 演示页

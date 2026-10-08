@@ -7,7 +7,7 @@ version = "0.1.0"
 
 readme = "README.mbt.md"
 
-repository = "https://github.com/PaperY0/MoonBit"
+repository = "https://github.com/PaperY0/zxcvbn-MoonBit"
 
 license = "MIT"
 
