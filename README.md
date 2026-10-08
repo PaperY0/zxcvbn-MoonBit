@@ -164,10 +164,18 @@ moon info           # 更新 .mbti 接口
 moon fmt            # 格式化
 moon test           # 测试
 moon run cmd/main -- "password"
-python3 tools/gen_dictionaries.py      # 从 data/upstream 重新生成词典数据模块
-python3 tools/gen_adjacency_graphs.py  # 从数据/upstream 重新生成键盘邻接图模块
+python tools/gen_dictionaries.py      # 从 data/upstream 重新生成词典数据模块
+python tools/gen_adjacency_graphs.py  # 从 data/upstream 重新生成键盘邻接图模块
+python tools/diff_test.py             # 对上游 zxcvbn@4.4.2 差分对拍，重写 DIFF-REPORT.md
 # 两个生成器的产物需再跑一次 moon fmt（生成器不保证 fmt-clean，CI 的 fmt 门禁会校验）
 ```
+
+> 上面的生成脚本需要 Python 3（>=3.9，无第三方依赖）。POSIX 系统上命令名通常是
+> `python3`；Windows 上若装的是 CPython 而非 Microsoft Store 版，命令名是 `python`——注意
+> `WindowsApps\python3.exe` 是商店占位程序，会以退出码 49 直接失败，这不是脚本的问题。
+>
+> `tools/diff_test.py` 额外需要 node 与 `tools/ref/node_modules`，先执行一次
+> `cd tools/ref && npm install`。
 
 ## 数据与许可
 
@@ -177,13 +185,17 @@ python3 tools/gen_adjacency_graphs.py  # 从数据/upstream 重新生成键盘�
 - 结构参考 `shssoichiro/zxcvbn-rs`（MIT）。
 - 本项目以 MIT 发布，LICENSE 保留上游版权声明。
 
-## 当前状态（2026-09-30）
+## 当前状态（2026-10-08）
 
 ✅ 评分引擎完整实现（8 匹配器 + DP + 每模式 guesses + 破解时间 + 建议）·
 ✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 53/53 测试通过 · ✅ `moon check` 0 error / 0 warning ·
-✅ CLI 输出完整结果与 JSON · ✅ 键盘邻接图数据由脚本生成（可复现）·
+✅ CLI 输出完整结果与 JSON、`--batch` JSON Lines · ✅ 键盘邻接图数据由脚本生成（可复现）·
 ✅ CI：wasm / wasm-gc / js 三后端测试矩阵 + fmt/check/接口校验门禁 ·
-🚧 Phase 3 剩余：`DIFF-REPORT.md` 系统性差分对拍、mooncakes 发布、demo/ wasm 演示页。
+✅ 已发布 mooncakes.io：`moon add PaperY0/zxcvbn`（`PaperY0/zxcvbn@0.1.0`）·
+✅ **差分对拍**：[`DIFF-REPORT.md`](DIFF-REPORT.md)——对上游 npm `zxcvbn@4.4.2` 跑 742 个用例，
+  729 例逐字段完全一致，其余 13 例全部归因于 README 已声明的两类偏差（非 BMP 下标、
+  `recent_year` 正则升级），**未预期不一致 0**。
+🚧 剩余：`demo/` wasm 演示页、覆盖率报告入库。
 
 ---
 

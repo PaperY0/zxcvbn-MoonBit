@@ -5,14 +5,19 @@
 // moon run cmd/main -- "Tr0ub4dor&3"
 // moon run cmd/main -- --user bob --user bob@example.com "Tr0ub4dor&3"
 // moon run cmd/main -- --year 2017 --json "password"
+// moon run cmd/main -- --batch "pw1" "pw2" "pw3"
 // ```
+//
+// `--batch` 把所有位置参数都当作密码，逐个评估并输出 JSON Lines（每行一个 JSON
+// 对象），供 tools/diff_test.py 差分对拍消费。批内所有密码共用同一组 `--user`
+// 与 `--year`，所以需要不同 user_inputs 的用例要分开跑。
 
 ///|
 fn main {
   let args = @env.args()
   if args.length() <= 1 {
     println(
-      "usage: moon run cmd/main -- [--user <word>]... [--year <n>] [--json] <password>",
+      "usage: moon run cmd/main -- [--user <word>]... [--year <n>] [--json] [--batch] <password>...",
     )
   } else {
     run(args)
@@ -22,26 +27,35 @@ fn main {
 ///|
 /// 解析后的命令行选项。
 struct CliOptions {
-  password : String?
+  /// 所有不以 `--` 开头、也不是选项取值的参数；单密码模式取第一个。
+  positionals : Array[String]
   user_inputs : Array[String]
   json : Bool
+  /// 批模式：把每个 positionals 元素当一个密码，输出 JSON Lines。
+  batch : Bool
   reference_year : Int
 }
 
 ///|
-/// 从 `args`（含 argv[0]）里解析选项。第一个不以 `--` 开头、且不是选项取值的
-/// 参数就是密码——这样 `--json --user bob "pw"` 也能正确工作。
+/// 从 `args`（含 argv[0]）里解析选项。位置参数先统一收进 `positionals`，
+/// 再由 `batch` 决定语义——这样 `--json --user bob "pw"` 与
+/// `--batch a b --user bob` 都能正确工作，且选项顺序无关。
 fn parse_options(args : Array[String]) -> CliOptions {
+  let positionals : Array[String] = []
   let user_inputs : Array[String] = []
   let mut json_mode = false
+  let mut batch_mode = false
   let mut reference_year = 2026
-  let mut password : String? = None
   let mut i = 1
   while i < args.length() {
     let arg = args[i]
     match arg {
       "--json" => {
         json_mode = true
+        i += 1
+      }
+      "--batch" => {
+        batch_mode = true
         i += 1
       }
       "--user" => {
@@ -58,16 +72,19 @@ fn parse_options(args : Array[String]) -> CliOptions {
           i += 1
         }
       }
-      _ =>
-        if password is None {
-          password = Some(arg)
-          i += 1
-        } else {
-          i += 1
-        }
+      _ => {
+        positionals.push(arg)
+        i += 1
+      }
     }
   }
-  { password, user_inputs, json: json_mode, reference_year, }
+  {
+    positionals,
+    user_inputs,
+    json: json_mode,
+    batch: batch_mode,
+    reference_year,
+  }
 }
 
 ///|
@@ -105,23 +122,34 @@ fn parse_int_option(s : String, fallback : Int) -> Int {
 ///|
 fn run(args : Array[String]) -> Unit {
   let opts = parse_options(args)
-  match opts.password {
-    Some(password) => {
-      let result = @lib.zxcvbn(
-        password,
-        opts.user_inputs,
-        reference_year=opts.reference_year,
-      )
-      if opts.json {
+  if opts.batch {
+    if opts.positionals.is_empty() {
+      println("usage: moon run cmd/main -- --batch <password>...")
+    } else {
+      for password in opts.positionals {
+        let result = @lib.zxcvbn(
+          password,
+          opts.user_inputs,
+          reference_year=opts.reference_year,
+        )
         print_json(result)
-      } else {
-        print_human(result)
       }
     }
-    None =>
-      println(
-        "usage: moon run cmd/main -- [--user <word>]... [--year <n>] [--json] <password>",
-      )
+  } else if opts.positionals.is_empty() {
+    println(
+      "usage: moon run cmd/main -- [--user <word>]... [--year <n>] [--json] [--batch] <password>...",
+    )
+  } else {
+    let result = @lib.zxcvbn(
+      opts.positionals[0],
+      opts.user_inputs,
+      reference_year=opts.reference_year,
+    )
+    if opts.json {
+      print_json(result)
+    } else {
+      print_human(result)
+    }
   }
 }
 

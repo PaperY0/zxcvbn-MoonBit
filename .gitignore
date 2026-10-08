@@ -5,5 +5,9 @@ target
 .mooncakes/
 .moonagent/
 trace.json
+# 差分对拍的 node 依赖与 Python 缓存，均可用 npm install 重建
+tools/ref/node_modules/
+__pycache__/
+*.pyc
 # upstream data snapshots (extracted copies are kept; tarballs are regenerable)
 data/upstream/*.tar.gz

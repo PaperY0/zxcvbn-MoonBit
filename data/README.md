@@ -55,7 +55,7 @@ zxcvbn-rs 差分对拍在数学上不可能通过（DoD 明确要求 guesses 精
 
 ```
 data/upstream/dropbox-zxcvbn/src/frequency_lists.coffee
-   └─ python3 tools/gen_dictionaries.py
+   └─ python tools/gen_dictionaries.py
         ├─ 断言 coffee 与 zxcvbn-rs/src/frequency_lists.rs 常量逐词一致（双源互证）
         ├─ 断言 6 表规模 = 30000/30000/3712/983/10000/19160
         └─ ../frequency_data.mbt   （961.8 KB，26 个 const 块 + 6 个 list 解析函数）
@@ -73,7 +73,7 @@ data/upstream/dropbox-zxcvbn/src/frequency_lists.coffee
 `const X : String =\n  #|`（`#|` 及数据行缩进），内容等价但字节不同。标准流程：
 
 ```bash
-python3 tools/gen_dictionaries.py   # 解析 coffee + 双源断言 + 写 frequency_data.mbt
+python tools/gen_dictionaries.py   # 解析 coffee + 双源断言 + 写 frequency_data.mbt
 moon fmt                            # 规范化多行字符串缩进
 moon test                           # 验证（5/5）
 ```

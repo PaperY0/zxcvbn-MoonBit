@@ -1,0 +1,10 @@
+{
+  "name": "zxcvbn-moonbit-diff-ref",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "description": "差分对拍的上游参照实现：npm zxcvbn@4.4.2，只被 tools/diff_test.py 使用，不参与本模块发布。",
+  "dependencies": {
+    "zxcvbn": "4.4.2"
+  }
+}
