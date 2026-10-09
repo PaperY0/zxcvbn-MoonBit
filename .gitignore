@@ -11,3 +11,5 @@ __pycache__/
 *.pyc
 # upstream data snapshots (extracted copies are kept; tarballs are regenerable)
 data/upstream/*.tar.gz
+# demo 的构建产物（demo/build.sh 生成）
+demo/zxcvbn.js

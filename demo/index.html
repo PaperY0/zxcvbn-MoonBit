@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>zxcvbn-MoonBit — 密码强度演示</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<main class="wrap">
+  <header>
+    <h1>密码强度评估</h1>
+    <p class="sub">
+      MoonBit 实现的 <a href="https://github.com/dropbox/zxcvbn" target="_blank" rel="noopener">zxcvbn</a>
+      攻击模型。全部计算在你的浏览器里完成，<strong>密码不会离开这个页面</strong>，也没有任何网络请求。
+    </p>
+  </header>
+
+  <section class="card">
+    <label for="pw">密码</label>
+    <input id="pw" type="text" autocomplete="off" spellcheck="false"
+           placeholder="输入密码，边打边看…" value="Tr0ub4dor&3">
+
+    <details class="advanced">
+      <summary>高级：把用户信息也算进去</summary>
+      <p class="hint">
+        真实破解者会先试和你相关的词。填上用户名 / 邮箱，它们会进入词典。
+      </p>
+      <label for="user">用户信息（逗号分隔）</label>
+      <input id="user" type="text" autocomplete="off" spellcheck="false"
+             placeholder="bob, bob@example.com">
+    </details>
+  </section>
+
+  <section class="card result" id="result" hidden>
+    <div class="score-row">
+      <div class="bar" id="bar">
+        <span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span><span class="seg"></span>
+      </div>
+      <span class="score-label" id="score-label">—</span>
+    </div>
+
+    <dl class="stats">
+      <div><dt>强度分</dt><dd id="score">—</dd></div>
+      <div><dt>猜测次数</dt><dd id="guesses">—</dd></div>
+      <div><dt>log₁₀(猜测)</dt><dd id="log10">—</dd></div>
+    </dl>
+
+    <h2>破解所需时间</h2>
+    <table class="times">
+      <thead><tr><th>场景</th><th>速度</th><th>耗时</th></tr></thead>
+      <tbody id="times"></tbody>
+    </table>
+
+    <h2>攻击者会先试什么</h2>
+    <p class="hint">下面是取最小猜测数的最优非重叠匹配序列——攻击模型的判断依据。</p>
+    <ul class="patterns" id="patterns"></ul>
+
+    <div class="feedback" id="feedback" hidden>
+      <p class="warning" id="warning"></p>
+      <ul class="suggestions" id="suggestions"></ul>
+    </div>
+  </section>
+
+  <footer>
+    <p>
+      强度分阈值与上游一致：10³ / 10⁶ / 10⁸ / 10¹⁰。
+      算法、词典与测试向量来自 <code>dropbox/zxcvbn</code>（MIT）。
+      对 <code>zxcvbn@4.4.2</code> 的 742 例差分对拍见
+      <a href="https://github.com/PaperY0/zxcvbn-MoonBit/blob/main/DIFF-REPORT.md" target="_blank" rel="noopener">DIFF-REPORT.md</a>。
+    </p>
+  </footer>
+</main>
+
+<script type="module" src="app.js"></script>
+</body>
+</html>

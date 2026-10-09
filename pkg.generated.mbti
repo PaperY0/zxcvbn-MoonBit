@@ -189,6 +189,7 @@ pub struct Entropy {
 } derive(Eq, @debug.Debug)
 pub fn Entropy::equal(Self, Self) -> Bool
 pub fn Entropy::not_equal(Self, Self) -> Bool
+pub fn Entropy::to_json(Self) -> String
 pub fn Entropy::to_repr(Self) -> @debug.Repr
 
 pub struct Feedback {

@@ -1,0 +1,9 @@
+import {
+  "PaperY0/zxcvbn" @lib,
+}
+
+pkgtype(kind: "foreign_library")
+
+options(
+  link: { "js": { "format": "esm", "exports": [ "zxcvbnReport" ] } },
+)

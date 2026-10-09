@@ -145,3 +145,45 @@ test "reference_year is parameterized" {
   // 1999 距 2005 只有 6 年 => 走 MIN_YEAR_SPACE=20；距 2026 有 27 年
   debug_inspect(b.guesses < a.guesses, content="true")
 }
+
+///|
+/// `to_json` 是给 Web 侧（foreign_library + js 后端）用的出口，字段名与顺序
+/// 必须和上游 result 对象对齐——`tools/diff_test.py` 与
+/// `tools/ref/zxcvbn_ref.mjs` 都按这个格式逐字段对拍。
+test "Entropy::to_json emits the upstream-shaped object" {
+  let r = @zxcvbn.zxcvbn("Tr0ub4dor&3", [])
+  let j = r.to_json()
+  // 顶层字段按固定顺序出现
+  for
+    key in [
+      "\"password\"", "\"guesses\"", "\"guesses_log10\"", "\"score\"", "\"crack_times_seconds\"",
+      "\"crack_times_display\"", "\"sequence\"", "\"feedback\"",
+    ] {
+    assert_true(j.contains(key), msg="json contains \{key}")
+  }
+  assert_true(j.contains("\"score\":4"), msg="score is 4")
+  // sequence 只投影五个共有字段，不泄露 Match 枚举内部表示
+  assert_true(
+    j.contains(
+      "{\"i\":0,\"j\":10,\"pattern\":\"bruteforce\",\"token\":\"Tr0ub4dor&3\",\"guesses\":100000000000}",
+    ),
+    msg="sequence[0] projected to the five shared fields",
+  )
+}
+
+///|
+/// 反馈文案里带引号与反斜杠时必须正确转义，否则产出非法 JSON。
+/// 上游 repeat 警告形如 `Repeats like "aaa" are easy to guess`。
+test "Entropy::to_json escapes quotes and backslashes" {
+  let r = @zxcvbn.zxcvbn("aaa", [])
+  let j = r.to_json()
+  // 引号必须转义成 \"，不能出现裸引号把字符串截断
+  assert_true(j.contains("\\\"aaa\\\""), msg="quotes in feedback are escaped")
+  assert_false(
+    j.contains("\"warning\":\"Repeats like \"aaa\"\""),
+    msg="no unescaped quote truncates the warning string",
+  )
+  // 首尾是完整 JSON 对象
+  assert_true(j.has_prefix("{"), msg="starts with {")
+  assert_true(j.has_suffix("}"), msg="ends with }")
+}

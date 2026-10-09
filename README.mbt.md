@@ -105,7 +105,10 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
    防止"用自己名字当密码"。
 2. **CLI 工具**：`moon run cmd/main -- "Tr0ub4dor&3"` 打印分数/熵/破解时间/模式明细/建议；
    `--json` 输出机器可读结果（供差分对拍消费）。
-3. **浏览器 Wasm 强度条**：MoonBit 纯计算库直接编 wasm-gc，前端注册表单即时打分，密码不回传。
+3. **浏览器强度条**：[`demo/`](demo/) 一个可运行的页面——输入即实时打分，密码不离开浏览器，
+   也没有任何网络请求（打开 DevTools 的 Network 面板可以验证）。MoonBit 侧编到 js 后端产出
+   ES module，`zxcvbnReport(password, user_inputs)` 返回 JSON 字符串；wasm / wasm-gc 后端
+   由 CI 的三后端测试矩阵覆盖。详见 [`demo/README.md`](demo/README.md)。
 
 ## 与上游的刻意差异（都是修正，逐条说明）
 
@@ -188,14 +191,16 @@ python tools/diff_test.py             # 对上游 zxcvbn@4.4.2 差分对拍，�
 ## 当前状态（2026-10-08）
 
 ✅ 评分引擎完整实现（8 匹配器 + DP + 每模式 guesses + 破解时间 + 建议）·
-✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 53/53 测试通过 · ✅ `moon check` 0 error / 0 warning ·
+✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 55/55 测试通过 · ✅ `moon check` 0 error / 0 warning ·
 ✅ CLI 输出完整结果与 JSON、`--batch` JSON Lines · ✅ 键盘邻接图数据由脚本生成（可复现）·
 ✅ CI：wasm / wasm-gc / js 三后端测试矩阵 + fmt/check/接口校验门禁 ·
 ✅ 已发布 mooncakes.io：`moon add PaperY0/zxcvbn`（`PaperY0/zxcvbn@0.1.0`）·
 ✅ **差分对拍**：[`DIFF-REPORT.md`](DIFF-REPORT.md)——对上游 npm `zxcvbn@4.4.2` 跑 742 个用例，
   729 例逐字段完全一致，其余 13 例全部归因于 README 已声明的两类偏差（非 BMP 下标、
   `recent_year` 正则升级），**未预期不一致 0**。
-🚧 剩余：`demo/` wasm 演示页、覆盖率报告入库。
+✅ `demo/` 浏览器强度页：MoonBit 编 js 后端出 ES module，密码不离开页面、零网络请求；
+  推送到 main 由 GitHub Actions 自动部署到 Pages。
+🚧 剩余：覆盖率报告入库。
 
 ---
 
