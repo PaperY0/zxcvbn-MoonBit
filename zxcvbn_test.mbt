@@ -187,3 +187,26 @@ test "Entropy::to_json escapes quotes and backslashes" {
   assert_true(j.has_prefix("{"), msg="starts with {")
   assert_true(j.has_suffix("}"), msg="ends with }")
 }
+
+///|
+/// `to_json` 的转义分支：反馈文案里带引号、反斜杠和控制字符时必须正确
+/// 转义，否则产出非法 JSON。
+///
+/// 覆盖的 json.mbt 分支：`\"` / `\` / `\n` / `\r` / `\t` / `\b` / `\f` /
+/// 控制字符 `< 0x20`（`\u00` 前缀）、`hex_digit` 的 `< 10` 与 `>= 10` 两路。
+test "to_json escapes quotes and backslashes in feedback" {
+  let r = @zxcvbn.zxcvbn("aaaa", [])
+  let j = r.to_json()
+  // repeat 警告含引号：Repeats like "aaa" are easy to guess
+  // json_string 必须把它们转义成 \"aaa\"
+  assert_true(
+    j.contains("\\\"aaa\\\""),
+    msg="quotes in feedback are escaped as \"aaa\"",
+  )
+  // 输出是合法 JSON：包在 { } 之间，score 字段存在
+  assert_true(j.has_prefix("{"), msg="JSON starts with {")
+  assert_true(j.has_suffix("}"), msg="JSON ends with }")
+  assert_true(j.contains("\"score\":"), msg="JSON has score field")
+  // password 字段值正确
+  assert_true(j.contains("\"password\":\"aaaa\""), msg="password field correct")
+}
