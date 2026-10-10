@@ -131,7 +131,7 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
 
 ## 测试策略
 
-**53 个测试全部通过**，来源三层：
+**56 个测试全部通过**，来源三层：
 
 1. **上游官方向量**（`test/test-matching.coffee` 10 个块 + `test/test-scoring.coffee` 12 个块）
    逐块转写：词典/反向/l33t（含子表与子集枚举）/键盘空间/序列/重复/正则/日期/omnimatch，
@@ -144,12 +144,12 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
 
 ```bash
 moon check   # 0 error，0 warning
-moon test    # 53/53（默认 wasm 后端）
+moon test    # 56/56（默认 wasm 后端）
 
-# 三个后端都全绿（验证“纯计算、无 IO 依赖”的声明）
-moon test --target wasm     # 53/53
-moon test --target wasm-gc  # 53/53
-moon test --target js       # 53/53
+# 三个后端都全绿（验证”纯计算、无 IO 依赖”的声明）
+moon test --target wasm     # 56/56
+moon test --target wasm-gc  # 56/56
+moon test --target js       # 56/56
 
 moon run cmd/main -- "correct horse battery staple"
 ```

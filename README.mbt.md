@@ -131,7 +131,7 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
 
 ## 测试策略
 
-**53 个测试全部通过**，来源三层：
+**56 个测试全部通过**，来源三层：
 
 1. **上游官方向量**（`test/test-matching.coffee` 10 个块 + `test/test-scoring.coffee` 12 个块）
    逐块转写：词典/反向/l33t（含子表与子集枚举）/键盘空间/序列/重复/正则/日期/omnimatch，
@@ -144,12 +144,12 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
 
 ```bash
 moon check   # 0 error，0 warning
-moon test    # 53/53（默认 wasm 后端）
+moon test    # 56/56（默认 wasm 后端）
 
-# 三个后端都全绿（验证“纯计算、无 IO 依赖”的声明）
-moon test --target wasm     # 53/53
-moon test --target wasm-gc  # 53/53
-moon test --target js       # 53/53
+# 三个后端都全绿（验证”纯计算、无 IO 依赖”的声明）
+moon test --target wasm     # 56/56
+moon test --target wasm-gc  # 56/56
+moon test --target js       # 56/56
 
 moon run cmd/main -- "correct horse battery staple"
 ```
@@ -191,16 +191,17 @@ python tools/diff_test.py             # 对上游 zxcvbn@4.4.2 差分对拍，�
 ## 当前状态（2026-10-08）
 
 ✅ 评分引擎完整实现（8 匹配器 + DP + 每模式 guesses + 破解时间 + 建议）·
-✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 55/55 测试通过 · ✅ `moon check` 0 error / 0 warning ·
+✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 56/56 测试通过 · ✅ `moon check` 0 error / 0 warning ·
 ✅ CLI 输出完整结果与 JSON、`--batch` JSON Lines · ✅ 键盘邻接图数据由脚本生成（可复现）·
 ✅ CI：wasm / wasm-gc / js 三后端测试矩阵 + fmt/check/接口校验门禁 ·
 ✅ 已发布 mooncakes.io：`moon add PaperY0/zxcvbn`（`PaperY0/zxcvbn@0.1.0`）·
 ✅ **差分对拍**：[`DIFF-REPORT.md`](DIFF-REPORT.md)——对上游 npm `zxcvbn@4.4.2` 跑 742 个用例，
   729 例逐字段完全一致，其余 13 例全部归因于 README 已声明的两类偏差（非 BMP 下标、
   `recent_year` 正则升级），**未预期不一致 0**。
+✅ **覆盖率报告**：[`COVERAGE.md`](COVERAGE.md)——83 行未覆盖，全部为防御性分支 / CLI 代码 /
+  需特定输入字符的 JSON 转义路径，核心算法无遗漏。
 ✅ `demo/` 浏览器强度页：MoonBit 编 js 后端出 ES module，密码不离开页面、零网络请求；
   推送到 main 由 GitHub Actions 自动部署到 Pages。
-🚧 剩余：覆盖率报告入库。
 
 ---
 
