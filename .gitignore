@@ -13,3 +13,5 @@ __pycache__/
 data/upstream/*.tar.gz
 # demo 的构建产物（demo/build.sh 生成）
 demo/zxcvbn.js
+# coverage 数据文件
+bisect.coverage

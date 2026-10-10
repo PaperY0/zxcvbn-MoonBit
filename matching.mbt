@@ -1404,8 +1404,7 @@ pub fn date_match(password : Array[Char], reference_year : Int) -> Array[Match] 
       let mut j = i + 3
       while j <= i + 7 {
         if j >= len {
-          j += 1
-          continue
+          break
         }
         let token = view_to_array(password[i:j + 1])
         if is_maybe_date_no_separator(token) {
@@ -1462,8 +1461,7 @@ pub fn date_match(password : Array[Char], reference_year : Int) -> Array[Match] 
       let mut j = i + 5
       while j <= i + 9 {
         if j >= len {
-          j += 1
-          continue
+          break
         }
         let token = view_to_array(password[i:j + 1])
         match parse_maybe_date_with_separator(token) {

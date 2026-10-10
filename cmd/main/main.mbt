@@ -69,6 +69,9 @@ fn parse_options(args : Array[String]) -> CliOptions {
         i += 1
         if i < args.length() {
           reference_year = parse_int_option(args[i], 2026)
+          if reference_year < 1900 || reference_year > 2100 {
+            reference_year = 2026
+          }
           i += 1
         }
       }
