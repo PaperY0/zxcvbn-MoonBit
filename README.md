@@ -195,7 +195,7 @@ python tools/diff_test.py             # 对上游 zxcvbn@4.4.2 差分对拍，�
 ## 当前状态（2026-10-08）
 
 ✅ 评分引擎完整实现（8 匹配器 + DP + 每模式 guesses + 破解时间 + 建议）·
-✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 56/56 测试通过 · ✅ `moon check` 0 error / 0 warning ·
+✅ 上游 22 个官方向量 test 块全部转写通过 · ✅ 57/57 测试通过 · ✅ `moon check` 0 error / 0 warning ·
 ✅ CLI 输出完整结果与 JSON、`--batch` JSON Lines · ✅ 键盘邻接图数据由脚本生成（可复现）·
 ✅ CI：wasm / wasm-gc / js 三后端测试矩阵 + fmt/check/接口校验门禁 ·
 ✅ 已发布 mooncakes.io：`moon add PaperY0/zxcvbn`（`PaperY0/zxcvbn@0.1.0`）·

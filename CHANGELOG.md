@@ -23,7 +23,7 @@ First public release on [mooncakes.io](https://mooncakes.io).
 - CLI: `moon run cmd/main -- "password"` with `--json`, `--batch`, `--user`, `--year`
 
 ### Quality
-- 56 tests, all passing on wasm / wasm-gc / js
+- 57 tests, all passing on wasm / wasm-gc / js
 - Differential testing against zxcvbn@4.4.2: 742 cases, 0 unexpected mismatches
 - CI: three-target matrix + fmt/check/interface gates
 - Coverage: 83 uncovered lines (all defensive branches / CLI / edge-case JSON escapes)
@@ -36,7 +36,7 @@ First public release on [mooncakes.io](https://mooncakes.io).
 - Dictionary match length capped to longest word in any dictionary
 - No global state: pure function, thread-safe
 
-## [0.1.1] — 2026-10-14
+## [Unreleased]
 
 ### Bug fixes
 - Dictionary matching: replace `to_ascii_lowercase()` with `String::to_lower()` via
@@ -44,10 +44,11 @@ First public release on [mooncakes.io](https://mooncakes.io).
   characters (e.g. Ü→ü) in user_inputs
 - CLI `--year` argument: add bounds check (1900–2100), fallback to 2026
 - date_match inner loop: `j >= len` branch now `break` instead of `j += 1; continue`
+- Fix date_match loop: `j += 1; continue` → `break` when `j >= len`
 
 ### Documentation
 - Add CHANGELOG.md, COVERAGE.md
-- Sync test count (53→57) across README.md and README.mbt.md
+- Sync test count across README.md and README.mbt.md
 - Document MoonBit `String::to_lower()` Unicode scope limitation (Greek uppercase
   not handled)
 

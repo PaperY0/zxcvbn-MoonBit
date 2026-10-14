@@ -23,7 +23,7 @@ python -m http.server -d demo 8000       # ES module 需要 http://，file:// �
 | 文件 | 作用 |
 | --- | --- |
 | `web/zxcvbn_web.mbt` | MoonBit 侧唯一导出：`zxcvbnReport(password, user_inputs) -> String` |
-| `web/moon.pkg.json` | `pkgtype: foreign_library` + `link.js { format: esm }` |
+| `web/moon.pkg` | `pkgtype: foreign_library` + `link.js { format: esm }` |
 | `index.html` / `app.js` / `style.css` | 前端 |
 | `zxcvbn.js` | **生成文件**，勿手改 |
 
