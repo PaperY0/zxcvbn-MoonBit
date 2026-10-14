@@ -35,3 +35,23 @@ First public release on [mooncakes.io](https://mooncakes.io).
 - `recent_year` regex upgraded to `19\d\d|20\d\d`
 - Dictionary match length capped to longest word in any dictionary
 - No global state: pure function, thread-safe
+
+## [0.1.1] — 2026-10-14
+
+### Bug fixes
+- Dictionary matching: replace `to_ascii_lowercase()` with `String::to_lower()` via
+  new `lower()` helper, fixing case-insensitive matching for Latin-1 Supplement
+  characters (e.g. Ü→ü) in user_inputs
+- CLI `--year` argument: add bounds check (1900–2100), fallback to 2026
+- date_match inner loop: `j >= len` branch now `break` instead of `j += 1; continue`
+
+### Documentation
+- Add CHANGELOG.md, COVERAGE.md
+- Sync test count (53→57) across README.md and README.mbt.md
+- Document MoonBit `String::to_lower()` Unicode scope limitation (Greek uppercase
+  not handled)
+
+### Known limitation
+- Greek uppercase case folding (Α→α): MoonBit `String::to_lower()` does not convert
+  Greek uppercase to lowercase. User_inputs containing Greek names with case variants
+  may not match. Requires MoonBit stdlib enhancement for full Unicode case folding.

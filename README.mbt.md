@@ -128,6 +128,10 @@ pub fn date_match(Array<Char>, Int) -> Array<Match>
    语义完全等价，但把词典匹配从 O(n²) 次哈希查询降到 O(n × 最长词长)。
 6. **无全局状态。** 上游用模块级变量传递用户输入词典；本实现改为调用时传入，天然纯函数、
    可重入、线程安全。
+7. **`String::to_lower()` 的 Unicode 范围。** MoonBit 标准库的 `String::to_lower()` 正确处理
+   ASCII（A-Z → a-z）和 Latin-1 Supplement（Ü → ü），但**不处理 Greek 大写**（Α → α 不做转换）。
+   因此希腊字母的大小写变体在用户词匹配中仍会失败，这是 MoonBit 标准库的限制，非本项目的
+   算法偏差。ASCII/Latin-1 范围的大小写不敏感匹配已通过 `lower()` 辅助函数对齐。
 
 ## 测试策略
 
