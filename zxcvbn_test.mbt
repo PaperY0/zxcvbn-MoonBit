@@ -101,6 +101,16 @@ test "non-BMP characters are counted as scalar values" {
 }
 
 ///|
+/// 边界：用户词的大小写变体应命中用户词典（ASCII 范围）。
+test "user input name matches regardless of password casing" {
+  // "alexandra" 在 female_names 词典 rank 396；密码全大写时应仍能命中
+  let r = @zxcvbn.zxcvbn("ALEXANDRA", ["alexandra"])
+  let dict_matches = r.sequence.filter(m => m.pattern() == "dictionary")
+  debug_inspect(dict_matches.length(), content="1")
+  debug_inspect(r.score, content="0")
+}
+
+///|
 /// 边界：长密码不应崩溃。
 /// 1000 个 'x' 是纯重复，上游行为就是弱（repeat pattern，score=1）。
 test "long password (1000 repeated chars) stays a weak repeat" {

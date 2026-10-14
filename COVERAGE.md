@@ -10,7 +10,7 @@ Target: wasm (default)
 | --- | --- |
 | Total files | 9 |
 | Uncovered lines | 83 |
-| Total tests | 56 (all passing) |
+| Total tests | 57 (all passing) |
 
 ## Uncovered Lines by File
 

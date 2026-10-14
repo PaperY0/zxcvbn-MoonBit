@@ -378,6 +378,13 @@ fn is_digit(c : Char) -> Bool {
 }
 
 ///|
+/// Unicode 感知的小写化（`Array[Char]` → `String` → `to_lower()` → `Array[Char]`）。
+/// 词典匹配和 l33t 匹配的密码小写化都用这个，保证与用户词典的 `to_lower()` 一致。
+fn lower(chars : Array[Char]) -> Array[Char] {
+  String::to_lower(String::from_array(chars)).to_array()
+}
+
+///|
 /// 上游 `scoring.START_UPPER` 等四个正则的字符级等价实现。
 fn all_ascii_lower(chars : Array[Char]) -> Bool {
   for c in chars {
@@ -507,7 +514,7 @@ pub fn dictionary_match(
   dictionaries : Array[(Dictionary, Map[String, Int])],
   max_word_length : Int,
 ) -> Array[Match] {
-  let password_lower = password.map(c => c.to_ascii_lowercase())
+  let password_lower = lower(password)
   dictionary_match_inner(
     password, password_lower, dictionaries, max_word_length,
   )
@@ -570,7 +577,7 @@ pub fn reverse_dictionary_match(
 ) -> Array[Match] {
   let len = password.length()
   let reversed = password.rev()
-  let reversed_lower = reversed.map(c => c.to_ascii_lowercase())
+  let reversed_lower = lower(reversed)
   let matches = dictionary_match_inner(
     reversed, reversed_lower, dictionaries, max_word_length,
   )
@@ -735,7 +742,7 @@ pub fn l33t_match(
       continue
     }
     let subbed = translate(password, sub)
-    let subbed_lower = subbed.map(c => c.to_ascii_lowercase())
+    let subbed_lower = lower(subbed)
     for
       m in dictionary_match_inner(
         subbed, subbed_lower, dictionaries, max_word_length,
